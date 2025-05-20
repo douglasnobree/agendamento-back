@@ -6,8 +6,9 @@ import {
   Param,
   UseGuards,
   Inject,
+  BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
-import { TenantService } from '../../infra/prisma/tenant.service';
 import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
 import { RolesGuard } from '../../infra/auth/roles.guard';
 import { Roles } from '../../infra/decorators/roles.decorator';
@@ -23,6 +24,8 @@ import { CreateTenantDto, TenantResponseDto } from '../dtos/tenant.dto';
 import { UsecaseProxyModule } from '../../application/usecases/usecase-proxy.module';
 import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
 import { ListTenantsUseCase } from '../../application/usecases/Tenants/tenant-useCase-list';
+import { CreateTenantUseCase } from '../../application/usecases/Tenants/tenant-useCase-create';
+import { GetTenantByIdUseCase } from '../../application/usecases/Tenants/tenant-useCase-getById';
 
 @Controller('admin/tenants')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -33,7 +36,10 @@ export class TenantController {
   constructor(
     @Inject(UsecaseProxyModule.LIST_TENANTS_USE_CASE)
     private readonly listTenantsUseCaseProxy: UseCaseProxy<ListTenantsUseCase>,
-    private readonly tenantService: TenantService,
+    @Inject(UsecaseProxyModule.CREATE_TENANT_USE_CASE)
+    private readonly createTenantUseCaseProxy: UseCaseProxy<CreateTenantUseCase>,
+    @Inject(UsecaseProxyModule.GET_TENANT_BY_ID_USE_CASE)
+    private readonly getTenantByIdUseCaseProxy: UseCaseProxy<GetTenantByIdUseCase>,
   ) {}
   @Post()
   @ApiOperation({ summary: 'Criar um novo tenant' })
@@ -45,8 +51,26 @@ export class TenantController {
     type: CreateTenantDto,
     description: 'Dados do tenant',
   })
-  async createTenant(@Body() createTenantDto: CreateTenantDto) {
-    return this.tenantService.createTenant(createTenantDto);
+  async createTenant(
+    @Body() data: CreateTenantDto,
+  ): Promise<TenantResponseDto> {
+    try {
+      const tenant = await this.createTenantUseCaseProxy
+        .getInstance()
+        .execute(data);
+      return {
+        id: tenant.id,
+        name: tenant.name,
+        schema: tenant.schema,
+        ownerEmail: tenant.ownerEmail,
+        planId: tenant.planId,
+        createdAt: tenant.createdAt,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro ao criar tenant: ' + error.message,
+      );
+    }
   }
   @Get()
   @ApiOperation({ summary: 'Listar todos os tenants' })
@@ -74,12 +98,18 @@ export class TenantController {
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   @ApiResponse({ status: 403, description: 'Acesso proibido' })
   @ApiResponse({ status: 404, description: 'Tenant não encontrado' })
-  @ApiBody({
-    type: CreateTenantDto,
-    description: 'Dados do tenant',
-  })
-  async getTenant(@Param('id') id: string) {
-    console.log('id', id);
-    return this.tenantService.getTenantById(id);
+  async getTenant(@Param('id') id: string): Promise<TenantResponseDto> {
+    const tenant = await this.getTenantByIdUseCaseProxy.getInstance().execute(id);
+    if (!tenant) {
+      throw new BadRequestException('Tenant não encontrado');
+    }
+    return {
+      id: tenant.id,
+      name: tenant.name,
+      schema: tenant.schema,
+      ownerEmail: tenant.ownerEmail,
+      planId: tenant.planId,
+      createdAt: tenant.createdAt,
+    };
   }
 }

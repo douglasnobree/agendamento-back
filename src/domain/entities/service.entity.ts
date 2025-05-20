@@ -55,4 +55,13 @@ export class Service {
   public get createdAt() {
     return this.props.createdAt;
   }
+
+  public update(
+    props: Partial<Omit<ServiceProps, 'id' | 'createdAt'>>,
+  ): Service {
+    return new Service({
+      ...this.props,
+      ...props,
+    });
+  }
 }

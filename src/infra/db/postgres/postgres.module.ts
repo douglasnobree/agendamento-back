@@ -3,6 +3,7 @@ import { PostgresService } from './postgres.service';
 import { TenantService } from '../../prisma/tenant.service';
 import { ConfigModule } from '@nestjs/config';
 import { TenantRepositoryPostgres } from './repositories/tenant.repository';
+import { ServiceRepositoryPostgres } from './repositories/service.repository';
 
 @Global()
 @Module({
@@ -11,16 +12,23 @@ import { TenantRepositoryPostgres } from './repositories/tenant.repository';
     PostgresService,
     TenantService,
     TenantRepositoryPostgres,
+    ServiceRepositoryPostgres,
     {
       provide: 'TenantRepository',
       useExisting: TenantRepositoryPostgres,
+    },
+    {
+      provide: 'ServiceRepository',
+      useExisting: ServiceRepositoryPostgres,
     },
   ],
   exports: [
     PostgresService,
     TenantService,
     TenantRepositoryPostgres,
+    ServiceRepositoryPostgres,
     'TenantRepository',
+    'ServiceRepository',
   ],
 })
 export class PostgresModule {}

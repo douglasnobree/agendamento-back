@@ -9,6 +9,7 @@ import {
   Put,
   UseGuards,
   Req,
+  Inject,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
 import { RolesGuard } from '../../infra/auth/roles.guard';
@@ -20,8 +21,15 @@ import {
   ApiParam,
   ApiProperty,
   ApiBearerAuth,
+  ApiHeader,
 } from '@nestjs/swagger';
-import { PostgresService } from '../../infra/db/postgres/postgres.service';
+import { UsecaseProxyModule } from '../../application/usecases/usecase-proxy.module';
+import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
+import { ListServicesUseCase } from '../../application/usecases/Services/service-useCase-list';
+import { GetServiceByIdUseCase } from '../../application/usecases/Services/service-useCase-getById';
+import { CreateServiceUseCase } from '../../application/usecases/Services/service-useCase-create';
+import { UpdateServiceUseCase } from '../../application/usecases/Services/service-useCase-update';
+import { RemoveServiceUseCase } from '../../application/usecases/Services/service-useCase-remove';
 
 // DTOs
 class CreateServiceDto {
@@ -76,8 +84,25 @@ class UpdateServiceDto {
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Serviços')
 @ApiBearerAuth()
+@ApiHeader({
+  name: 'x-tenant-id',
+  description: 'Identificador do tenant',
+  required: true,
+  schema: { type: 'string' },
+})
 export class ServiceController {
-  constructor(private readonly postgres: PostgresService) {}
+  constructor(
+    @Inject(UsecaseProxyModule.LIST_SERVICES_USE_CASE)
+    private readonly listServicesUseCaseProxy: UseCaseProxy<ListServicesUseCase>,
+    @Inject(UsecaseProxyModule.GET_SERVICE_BY_ID_USE_CASE)
+    private readonly getServiceByIdUseCaseProxy: UseCaseProxy<GetServiceByIdUseCase>,
+    @Inject(UsecaseProxyModule.CREATE_SERVICE_USE_CASE)
+    private readonly createServiceUseCaseProxy: UseCaseProxy<CreateServiceUseCase>,
+    @Inject(UsecaseProxyModule.UPDATE_SERVICE_USE_CASE)
+    private readonly updateServiceUseCaseProxy: UseCaseProxy<UpdateServiceUseCase>,
+    @Inject(UsecaseProxyModule.REMOVE_SERVICE_USE_CASE)
+    private readonly removeServiceUseCaseProxy: UseCaseProxy<RemoveServiceUseCase>,
+  ) {}
 
   @Get()
   @Roles('owner', 'admin', 'client')
@@ -90,10 +115,7 @@ export class ServiceController {
   @ApiResponse({ status: 403, description: 'Acesso proibido' })
   async findAll(@Req() req: Request) {
     const tenantSchema = (req as any).tenantSchema;
-    const result = await this.postgres.query(
-      `SELECT * FROM "${tenantSchema}"."Service"`,
-    );
-    return result.rows;
+    return this.listServicesUseCaseProxy.getInstance().execute(tenantSchema);
   }
 
   @Get(':id')
@@ -106,11 +128,9 @@ export class ServiceController {
   @ApiResponse({ status: 404, description: 'Serviço não encontrado' })
   async findOne(@Req() req: Request, @Param('id') id: string) {
     const tenantSchema = (req as any).tenantSchema;
-    const result = await this.postgres.query(
-      `SELECT * FROM "${tenantSchema}"."Service" WHERE id = $1`,
-      [id],
-    );
-    return result.rows[0];
+    return this.getServiceByIdUseCaseProxy
+      .getInstance()
+      .execute(tenantSchema, id);
   }
 
   @Post()
@@ -122,11 +142,10 @@ export class ServiceController {
   @ApiResponse({ status: 403, description: 'Acesso proibido' })
   async create(@Req() req: Request, @Body() data: CreateServiceDto) {
     const tenantSchema = (req as any).tenantSchema;
-    const result = await this.postgres.query(
-      `INSERT INTO "${tenantSchema}"."Service" (id, name, description, duration, price, createdAt) VALUES (gen_random_uuid(), $1, $2, $3, $4, CURRENT_TIMESTAMP) RETURNING *`,
-      [data.name, data.description, data.duration, data.price],
-    );
-    return result.rows[0];
+    console.log('Creating service with data:', data);
+    return this.createServiceUseCaseProxy
+      .getInstance()
+      .execute(tenantSchema, data);
   }
 
   @Put(':id')
@@ -144,11 +163,9 @@ export class ServiceController {
     @Body() data: UpdateServiceDto,
   ) {
     const tenantSchema = (req as any).tenantSchema;
-    const result = await this.postgres.query(
-      `UPDATE "${tenantSchema}"."Service" SET name = $1, description = $2, duration = $3, price = $4 WHERE id = $5 RETURNING *`,
-      [data.name, data.description, data.duration, data.price, id],
-    );
-    return result.rows[0];
+    return this.updateServiceUseCaseProxy
+      .getInstance()
+      .execute(tenantSchema, { id, ...data });
   }
 
   @Delete(':id')
@@ -161,10 +178,9 @@ export class ServiceController {
   @ApiResponse({ status: 404, description: 'Serviço não encontrado' })
   async remove(@Req() req: Request, @Param('id') id: string) {
     const tenantSchema = (req as any).tenantSchema;
-    await this.postgres.query(
-      `DELETE FROM "${tenantSchema}"."Service" WHERE id = $1`,
-      [id],
-    );
+    await this.removeServiceUseCaseProxy
+      .getInstance()
+      .execute(tenantSchema, id);
     return { success: true };
   }
 }

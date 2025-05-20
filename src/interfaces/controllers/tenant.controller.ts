@@ -19,6 +19,7 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiBody,
+  ApiHeader,
 } from '@nestjs/swagger';
 import { CreateTenantDto, TenantResponseDto } from '../dtos/tenant.dto';
 import { UsecaseProxyModule } from '../../application/usecases/usecase-proxy.module';
@@ -32,6 +33,12 @@ import { GetTenantByIdUseCase } from '../../application/usecases/Tenants/tenant-
 @Roles('admin')
 @ApiTags('Tenants')
 @ApiBearerAuth()
+@ApiHeader({
+  name: 'x-tenant-id',
+  description: 'Identificador do tenant',
+  required: false,
+  schema: { type: 'string' },
+})
 export class TenantController {
   constructor(
     @Inject(UsecaseProxyModule.LIST_TENANTS_USE_CASE)
@@ -99,7 +106,9 @@ export class TenantController {
   @ApiResponse({ status: 403, description: 'Acesso proibido' })
   @ApiResponse({ status: 404, description: 'Tenant não encontrado' })
   async getTenant(@Param('id') id: string): Promise<TenantResponseDto> {
-    const tenant = await this.getTenantByIdUseCaseProxy.getInstance().execute(id);
+    const tenant = await this.getTenantByIdUseCaseProxy
+      .getInstance()
+      .execute(id);
     if (!tenant) {
       throw new BadRequestException('Tenant não encontrado');
     }

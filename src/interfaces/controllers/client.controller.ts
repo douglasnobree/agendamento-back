@@ -19,6 +19,7 @@ import {
   ApiParam,
   ApiProperty,
   ApiBearerAuth,
+  ApiHeader,
 } from '@nestjs/swagger';
 
 class CreateClientDto {
@@ -63,6 +64,12 @@ class UpdateClientDto {
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Clientes')
 @ApiBearerAuth()
+@ApiHeader({
+  name: 'x-tenant-id',
+  description: 'Identificador do tenant',
+  required: true,
+  schema: { type: 'string' },
+})
 export class ClientController {
   constructor(private readonly postgres: PostgresService) {}
 

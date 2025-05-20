@@ -12,6 +12,7 @@ import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
 import { RolesGuard } from '../../infra/auth/roles.guard';
 import { Roles } from '../../infra/decorators/roles.decorator';
 import { PostgresService } from '../../infra/db/postgres/postgres.service';
+import { ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 
 class CreateStaffDto {
   name: string;
@@ -28,6 +29,13 @@ class UpdateStaffDto {
 @Controller('api/tenant/staff')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('owner', 'admin')
+@ApiBearerAuth()
+@ApiHeader({
+  name: 'x-tenant-id',
+  description: 'Identificador do tenant',
+  required: true,
+  schema: { type: 'string' },
+})
 export class StaffController {
   constructor(private readonly postgres: PostgresService) {}
 

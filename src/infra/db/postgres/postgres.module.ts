@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TenantRepositoryPostgres } from './repositories/tenant.repository';
 import { ServiceRepositoryPostgres } from './repositories/service.repository';
 import { ClientRepositoryPostgres } from './repositories/client.repository';
+import { StaffRepositoryPostgres } from './repositories/staff.repository';
 
 @Global()
 @Module({
@@ -15,6 +16,7 @@ import { ClientRepositoryPostgres } from './repositories/client.repository';
     TenantRepositoryPostgres,
     ServiceRepositoryPostgres,
     ClientRepositoryPostgres,
+    StaffRepositoryPostgres,
     {
       provide: 'TenantRepository',
       useExisting: TenantRepositoryPostgres,
@@ -27,6 +29,10 @@ import { ClientRepositoryPostgres } from './repositories/client.repository';
       provide: 'ClientRepository',
       useExisting: ClientRepositoryPostgres,
     },
+    {
+      provide: 'StaffRepository',
+      useExisting: StaffRepositoryPostgres,
+    },
   ],
   exports: [
     PostgresService,
@@ -34,9 +40,11 @@ import { ClientRepositoryPostgres } from './repositories/client.repository';
     TenantRepositoryPostgres,
     ServiceRepositoryPostgres,
     ClientRepositoryPostgres,
+    StaffRepositoryPostgres,
     'TenantRepository',
     'ServiceRepository',
     'ClientRepository',
+    'StaffRepository',
   ],
 })
 export class PostgresModule {}

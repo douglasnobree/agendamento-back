@@ -18,6 +18,12 @@ import { GetClientByIdUseCase } from './Clients/client-useCase-getById';
 import { CreateClientUseCase } from './Clients/client-useCase-create';
 import { UpdateClientUseCase } from './Clients/client-useCase-update';
 import { RemoveClientUseCase } from './Clients/client-useCase-remove';
+import { StaffRepositoryPostgres } from '../../infra/db/postgres/repositories/staff.repository';
+import { ListStaffUseCase } from './Staff/staff-useCase-list';
+import { GetStaffByIdUseCase } from './Staff/staff-useCase-getById';
+import { CreateStaffUseCase } from './Staff/staff-useCase-create';
+import { UpdateStaffUseCase } from './Staff/staff-useCase-update';
+import { RemoveStaffUseCase } from './Staff/staff-useCase-remove';
 
 @Module({
   imports: [PostgresModule],
@@ -36,6 +42,11 @@ export class UsecaseProxyModule {
   static CREATE_CLIENT_USE_CASE = 'createClientUsecaseProxy';
   static UPDATE_CLIENT_USE_CASE = 'updateClientUsecaseProxy';
   static REMOVE_CLIENT_USE_CASE = 'removeClientUsecaseProxy';
+  static LIST_STAFF_USE_CASE = 'listStaffUsecaseProxy';
+  static GET_STAFF_BY_ID_USE_CASE = 'getStaffByIdUsecaseProxy';
+  static CREATE_STAFF_USE_CASE = 'createStaffUsecaseProxy';
+  static UPDATE_STAFF_USE_CASE = 'updateStaffUsecaseProxy';
+  static REMOVE_STAFF_USE_CASE = 'removeStaffUsecaseProxy';
 
   static register(): DynamicModule {
     return {
@@ -126,6 +137,37 @@ export class UsecaseProxyModule {
           useFactory: (clientRepository: ClientRepositoryPostgres) =>
             new UseCaseProxy(new RemoveClientUseCase(clientRepository)),
         },
+        // --- STAFF ---
+        {
+          inject: [StaffRepositoryPostgres],
+          provide: UsecaseProxyModule.LIST_STAFF_USE_CASE,
+          useFactory: (staffRepository: StaffRepositoryPostgres) =>
+            new UseCaseProxy(new ListStaffUseCase(staffRepository)),
+        },
+        {
+          inject: [StaffRepositoryPostgres],
+          provide: UsecaseProxyModule.GET_STAFF_BY_ID_USE_CASE,
+          useFactory: (staffRepository: StaffRepositoryPostgres) =>
+            new UseCaseProxy(new GetStaffByIdUseCase(staffRepository)),
+        },
+        {
+          inject: [StaffRepositoryPostgres],
+          provide: UsecaseProxyModule.CREATE_STAFF_USE_CASE,
+          useFactory: (staffRepository: StaffRepositoryPostgres) =>
+            new UseCaseProxy(new CreateStaffUseCase(staffRepository)),
+        },
+        {
+          inject: [StaffRepositoryPostgres],
+          provide: UsecaseProxyModule.UPDATE_STAFF_USE_CASE,
+          useFactory: (staffRepository: StaffRepositoryPostgres) =>
+            new UseCaseProxy(new UpdateStaffUseCase(staffRepository)),
+        },
+        {
+          inject: [StaffRepositoryPostgres],
+          provide: UsecaseProxyModule.REMOVE_STAFF_USE_CASE,
+          useFactory: (staffRepository: StaffRepositoryPostgres) =>
+            new UseCaseProxy(new RemoveStaffUseCase(staffRepository)),
+        },
       ],
       exports: [
         UsecaseProxyModule.CREATE_TENANT_USE_CASE,
@@ -141,6 +183,11 @@ export class UsecaseProxyModule {
         UsecaseProxyModule.CREATE_CLIENT_USE_CASE,
         UsecaseProxyModule.UPDATE_CLIENT_USE_CASE,
         UsecaseProxyModule.REMOVE_CLIENT_USE_CASE,
+        UsecaseProxyModule.LIST_STAFF_USE_CASE,
+        UsecaseProxyModule.GET_STAFF_BY_ID_USE_CASE,
+        UsecaseProxyModule.CREATE_STAFF_USE_CASE,
+        UsecaseProxyModule.UPDATE_STAFF_USE_CASE,
+        UsecaseProxyModule.REMOVE_STAFF_USE_CASE,
       ],
     };
   }

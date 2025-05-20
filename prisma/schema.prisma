@@ -1,0 +1,107 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["public", "tenant"]
+}
+
+model PlatformAdmin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+
+  @@schema("public")
+}
+
+model Plan {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  price       Float
+  features    Json
+  tenants     Tenant[]
+  createdAt   DateTime @default(now())
+
+  @@schema("public")
+}
+
+model Tenant {
+  id         String   @id @default(uuid())
+  name       String
+  schema     String   @unique
+  ownerEmail String   @unique
+  planId     String
+  plan       Plan     @relation(fields: [planId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@schema("public")
+}
+
+// Modelos para os schemas de tenant
+model Owner {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String?
+  oauthType String? // 'google' | 'facebook' etc
+  oauthId   String?  @unique
+  createdAt DateTime @default(now())
+
+  @@schema("tenant")
+}
+
+model Client {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String
+  phone        String?
+  appointments Appointment[]
+  createdAt    DateTime      @default(now())
+
+  @@schema("tenant")
+}
+
+model Service {
+  id           String        @id @default(uuid())
+  name         String
+  description  String?
+  duration     Int // minutos
+  price        Float
+  appointments Appointment[]
+  createdAt    DateTime      @default(now())
+
+  @@schema("tenant")
+}
+
+model Staff {
+  id           String        @id @default(uuid())
+  name         String
+  role         String
+  email        String        @unique
+  password     String?
+  appointments Appointment[]
+  createdAt    DateTime      @default(now())
+
+  @@schema("tenant")
+}
+
+model Appointment {
+  id          String   @id @default(uuid())
+  clientId    String
+  serviceId   String
+  staffId     String
+  scheduledAt DateTime
+  status      String // 'pending' | 'confirmed' | 'cancelled'
+  client      Client   @relation(fields: [clientId], references: [id])
+  service     Service  @relation(fields: [serviceId], references: [id])
+  staff       Staff    @relation(fields: [staffId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@schema("tenant")
+}

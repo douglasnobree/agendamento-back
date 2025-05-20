@@ -30,55 +30,7 @@ import { GetServiceByIdUseCase } from '../../application/usecases/Services/servi
 import { CreateServiceUseCase } from '../../application/usecases/Services/service-useCase-create';
 import { UpdateServiceUseCase } from '../../application/usecases/Services/service-useCase-update';
 import { RemoveServiceUseCase } from '../../application/usecases/Services/service-useCase-remove';
-
-// DTOs
-class CreateServiceDto {
-  @ApiProperty({ description: 'Nome do serviço', example: 'Corte de cabelo' })
-  name: string;
-
-  @ApiProperty({
-    description: 'Descrição do serviço',
-    example: 'Corte com tesoura e máquina',
-    required: false,
-  })
-  description?: string;
-
-  @ApiProperty({ description: 'Duração do serviço em minutos', example: 30 })
-  duration: number;
-
-  @ApiProperty({ description: 'Preço do serviço', example: 50.0 })
-  price: number;
-}
-
-class UpdateServiceDto {
-  @ApiProperty({
-    description: 'Nome do serviço',
-    example: 'Corte de cabelo',
-    required: false,
-  })
-  name?: string;
-
-  @ApiProperty({
-    description: 'Descrição do serviço',
-    example: 'Corte com tesoura e máquina',
-    required: false,
-  })
-  description?: string;
-
-  @ApiProperty({
-    description: 'Duração do serviço em minutos',
-    example: 30,
-    required: false,
-  })
-  duration?: number;
-
-  @ApiProperty({
-    description: 'Preço do serviço',
-    example: 50.0,
-    required: false,
-  })
-  price?: number;
-}
+import { CreateServiceDto, UpdateServiceDto } from '../dtos/service.dto';
 
 @Controller('api/tenant/services')
 @UseGuards(JwtAuthGuard, RolesGuard)

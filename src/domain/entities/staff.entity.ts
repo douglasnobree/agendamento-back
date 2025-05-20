@@ -3,7 +3,7 @@ export type StaffProps = {
   name: string;
   role: string;
   email: string;
-  password?: string;
+  password: string;
   createdAt?: Date;
 };
 
@@ -14,7 +14,7 @@ export class Staff {
     name: string,
     role: string,
     email: string,
-    password?: string,
+    password: string,
   ): Staff {
     if (!name || !role || !email) {
       throw new Error('Nome, cargo e email são obrigatórios');

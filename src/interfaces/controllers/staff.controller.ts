@@ -64,6 +64,7 @@ export class StaffController {
   @Post()
   async create(@Req() req: Request, @Body() data: CreateStaffDto) {
     const tenantSchema = (req as any).tenantSchema;
+    console.log('tenantSchema', data);
     return this.createStaffUseCaseProxy
       .getInstance()
       .execute(tenantSchema, data);

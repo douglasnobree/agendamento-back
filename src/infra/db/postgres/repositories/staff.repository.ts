@@ -26,14 +26,14 @@ export class StaffRepositoryPostgres implements StaffRepository {
   async save(schema: string, staff: Staff): Promise<void> {
     const props = staff.toPersistence();
     await this.postgres.query(
-      `INSERT INTO "${schema}"."Staff" (id, name, role, email, password, "createdAt") VALUES ($1, $2, $3, $4, $5, $6)`,
+      `INSERT INTO "${schema}"."Staff" (id, name, role, email, "createdAt", password) VALUES ($1, $2, $3, $4, $5, $6)`,
       [
         props.id,
         props.name,
         props.role,
         props.email,
-        props.password,
         props.createdAt,
+        props.password,
       ],
     );
   }

@@ -6,6 +6,7 @@ export type CreateStaffInput = {
   name: string;
   email: string;
   role: string;
+  password: string;
 };
 
 @Injectable()
@@ -19,7 +20,7 @@ export class CreateStaffUseCase {
     if (!input.name || !input.email || !input.role) {
       throw new BadRequestException('Nome, email e cargo são obrigatórios');
     }
-    const staff = Staff.create(input.name, input.role, input.email);
+    const staff = Staff.create(input.name, input.role, input.email, input.password);
     await this.staffRepository.save(schema, staff);
     return staff;
   }

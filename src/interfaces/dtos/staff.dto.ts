@@ -22,6 +22,14 @@ export class CreateStaffDto {
   @IsString()
   @IsNotEmpty({ message: 'O cargo é obrigatório' })
   role: string;
+
+  @ApiProperty({
+    description: 'Senha do membro da equipe',
+    example: 'senha123',
+  })
+  @IsString()
+  @IsNotEmpty({ message: 'A senha é obrigatória' })
+  password: string;
 }
 
 export class UpdateStaffDto {
@@ -44,4 +52,12 @@ export class UpdateStaffDto {
   @ApiProperty({ description: 'Cargo', example: 'Atendente', required: false })
   @IsString()
   role?: string;
+
+  @ApiProperty({
+    description: 'Senha do membro da equipe',
+    example: 'senha123',
+    required: false,
+  })
+  @IsString()
+  password?: string;
 }

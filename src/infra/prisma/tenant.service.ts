@@ -1,16 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
-import { Prisma, Tenant } from '@prisma/client';
-import { PrismaClient } from '@prisma/client';
+import { PostgresService } from '../db/postgres/postgres.service';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class TenantService {
-  private tenantPrismaClients: Map<string, PrismaClient> = new Map();
-
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly postgres: PostgresService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -18,219 +14,155 @@ export class TenantService {
     name: string;
     ownerEmail: string;
     planId: string;
-  }): Promise<Tenant> {
-    // Gerar um schema único baseado no nome (transformar em slug e adicionar um timestamp)
+  }): Promise<any> {
     const schema = `tenant_${data.name
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '_')}_${Date.now()}`;
 
     // Criar um novo tenant no schema public
-    const tenant = await this.prisma.tenant.create({
-      data: {
-        ...data,
-        schema,
-      },
-    });
-
-    // Criar o schema no banco de dados
-    await this.prisma.$executeRawUnsafe(
-      `CREATE SCHEMA IF NOT EXISTS "${schema}"`,
-    );
-
+    const client = await this.postgres.getClient();
     try {
-      // Vamos migrar o schema do tenant usando o Prisma
-      // Em um ambiente de produção, você deve usar uma estratégia mais robusta
-      // Isso é apenas para fins de demonstração
+      await client.query('BEGIN');
+      const tenantResult = await client.query(
+        `INSERT INTO public."Tenant" ("id", name, "ownerEmail", "planId", schema) VALUES (gen_random_uuid(), $1, $2, $3, $4) RETURNING *`,
+        [data.name, data.ownerEmail, data.planId, schema],
+      );
+      const tenant = tenantResult.rows[0];
 
-      // Gerar hash de senha para o owner
+      await client.query(`CREATE SCHEMA IF NOT EXISTS "${schema}"`);
+
       const salt = await bcrypt.genSalt();
-      const hashedPassword = await bcrypt.hash('password123', salt); // Criar tabelas para o tenant usando Prisma schema
-      // Executar comandos SQL separados para criar as tabelas no schema específico
+      const hashedPassword = await bcrypt.hash('password123', salt);
 
-      // Criar tabela Owner
-      await this.prisma.$executeRawUnsafe(`
-        CREATE TABLE IF NOT EXISTS "${schema}"."Owner" (
-          "id" TEXT NOT NULL,
-          "email" TEXT NOT NULL,
-          "name" TEXT NOT NULL,
-          "password" TEXT,
-          "oauthType" TEXT,
-          "oauthId" TEXT,
-          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          CONSTRAINT "Owner_pkey" PRIMARY KEY ("id")
+      // Criar tabelas e índices
+      await client.query(`CREATE TABLE IF NOT EXISTS "${schema}"."Owner" (
+        "id" TEXT PRIMARY KEY,
+        "email" TEXT NOT NULL,
+        "name" TEXT NOT NULL,
+        "password" TEXT,
+        "oauthType" TEXT,
+        "oauthId" TEXT,
+        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )`);
+      await client.query(
+        `CREATE UNIQUE INDEX IF NOT EXISTS "Owner_email_key" ON "${schema}"."Owner"("email")`,
+      );
+      await client.query(
+        `CREATE UNIQUE INDEX IF NOT EXISTS "Owner_oauthId_key" ON "${schema}"."Owner"("oauthId")`,
+      );
+      await client.query(`CREATE TABLE IF NOT EXISTS "${schema}"."Client" (
+        "id" TEXT PRIMARY KEY,
+        "email" TEXT NOT NULL,
+        "name" TEXT NOT NULL,
+        "phone" TEXT,
+        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )`);
+      await client.query(
+        `CREATE UNIQUE INDEX IF NOT EXISTS "Client_email_key" ON "${schema}"."Client"("email")`,
+      );
+      await client.query(`CREATE TABLE IF NOT EXISTS "${schema}"."Service" (
+        "id" TEXT PRIMARY KEY,
+        "name" TEXT NOT NULL,
+        "description" TEXT,
+        "duration" INTEGER NOT NULL,
+        "price" DOUBLE PRECISION NOT NULL,
+        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )`);
+      await client.query(`CREATE TABLE IF NOT EXISTS "${schema}"."Staff" (
+        "id" TEXT PRIMARY KEY,
+        "name" TEXT NOT NULL,
+        "role" TEXT NOT NULL,
+        "email" TEXT NOT NULL,
+        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )`);
+      await client.query(
+        `CREATE UNIQUE INDEX IF NOT EXISTS "Staff_email_key" ON "${schema}"."Staff"("email")`,
+      );
+      await client.query(`CREATE TABLE IF NOT EXISTS "${schema}"."Appointment" (
+        "id" TEXT PRIMARY KEY,
+        "clientId" TEXT NOT NULL,
+        "serviceId" TEXT NOT NULL,
+        "staffId" TEXT NOT NULL,
+        "scheduledAt" TIMESTAMP(3) NOT NULL,
+        "status" TEXT NOT NULL,
+        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )`);
+      // Corrige sintaxe do Postgres: não existe 'ADD CONSTRAINT IF NOT EXISTS' para foreign key
+      // Primeiro verifica se a constraint já existe, se não, adiciona
+      // Para simplificar, tenta adicionar e ignora erro de duplicidade
+      try {
+        await client.query(
+          `ALTER TABLE "${schema}"."Appointment" ADD CONSTRAINT "Appointment_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "${schema}"."Client"("id") ON DELETE RESTRICT ON UPDATE CASCADE`,
         );
-      `);
-
-      await this.prisma.$executeRawUnsafe(`
-        CREATE UNIQUE INDEX IF NOT EXISTS "Owner_email_key" ON "${schema}"."Owner"("email");
-      `);
-
-      await this.prisma.$executeRawUnsafe(`
-        CREATE UNIQUE INDEX IF NOT EXISTS "Owner_oauthId_key" ON "${schema}"."Owner"("oauthId");
-      `);
-
-      // Criar tabela Client
-      await this.prisma.$executeRawUnsafe(`
-        CREATE TABLE IF NOT EXISTS "${schema}"."Client" (
-          "id" TEXT NOT NULL,
-          "email" TEXT NOT NULL,
-          "name" TEXT NOT NULL,
-          "phone" TEXT,
-          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          CONSTRAINT "Client_pkey" PRIMARY KEY ("id")
+      } catch (e) {
+        // Se a constraint já existe, ignora o erro
+        if (!e.message.includes('already exists')) throw e;
+      }
+      try {
+        await client.query(
+          `ALTER TABLE "${schema}"."Appointment" ADD CONSTRAINT "Appointment_serviceId_fkey" FOREIGN KEY ("serviceId") REFERENCES "${schema}"."Service"("id") ON DELETE RESTRICT ON UPDATE CASCADE`,
         );
-      `);
-
-      await this.prisma.$executeRawUnsafe(`
-        CREATE UNIQUE INDEX IF NOT EXISTS "Client_email_key" ON "${schema}"."Client"("email");
-      `);
-
-      // Criar tabela Service
-      await this.prisma.$executeRawUnsafe(`
-        CREATE TABLE IF NOT EXISTS "${schema}"."Service" (
-          "id" TEXT NOT NULL,
-          "name" TEXT NOT NULL,
-          "description" TEXT,
-          "duration" INTEGER NOT NULL,
-          "price" DOUBLE PRECISION NOT NULL,
-          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          CONSTRAINT "Service_pkey" PRIMARY KEY ("id")
+      } catch (e) {
+        if (!e.message.includes('already exists')) throw e;
+      }
+      try {
+        await client.query(
+          `ALTER TABLE "${schema}"."Appointment" ADD CONSTRAINT "Appointment_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "${schema}"."Staff"("id") ON DELETE RESTRICT ON UPDATE CASCADE`,
         );
-      `);
-
-      // Criar tabela Staff
-      await this.prisma.$executeRawUnsafe(`
-        CREATE TABLE IF NOT EXISTS "${schema}"."Staff" (
-          "id" TEXT NOT NULL,
-          "name" TEXT NOT NULL,
-          "role" TEXT NOT NULL,
-          "email" TEXT NOT NULL,
-          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          CONSTRAINT "Staff_pkey" PRIMARY KEY ("id")
-        );
-      `);
-
-      await this.prisma.$executeRawUnsafe(`
-        CREATE UNIQUE INDEX IF NOT EXISTS "Staff_email_key" ON "${schema}"."Staff"("email");
-      `);
-
-      // Criar tabela Appointment
-      await this.prisma.$executeRawUnsafe(`
-        CREATE TABLE IF NOT EXISTS "${schema}"."Appointment" (
-          "id" TEXT NOT NULL,
-          "clientId" TEXT NOT NULL,
-          "serviceId" TEXT NOT NULL,
-          "staffId" TEXT NOT NULL,
-          "scheduledAt" TIMESTAMP(3) NOT NULL,
-          "status" TEXT NOT NULL,
-          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          CONSTRAINT "Appointment_pkey" PRIMARY KEY ("id")
-        );
-      `);
-
-      // Adicionar chaves estrangeiras
-      await this.prisma.$executeRawUnsafe(`
-        ALTER TABLE "${schema}"."Appointment" ADD CONSTRAINT "Appointment_clientId_fkey" 
-          FOREIGN KEY ("clientId") REFERENCES "${schema}"."Client"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-      `);
-
-      await this.prisma.$executeRawUnsafe(`
-        ALTER TABLE "${schema}"."Appointment" ADD CONSTRAINT "Appointment_serviceId_fkey" 
-          FOREIGN KEY ("serviceId") REFERENCES "${schema}"."Service"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-      `);
-
-      await this.prisma.$executeRawUnsafe(`
-        ALTER TABLE "${schema}"."Appointment" ADD CONSTRAINT "Appointment_staffId_fkey" 
-          FOREIGN KEY ("staffId") REFERENCES "${schema}"."Staff"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-      `);
-
-      // Criar o primeiro usuário dono (owner) para este tenant
-      await this.prisma.$executeRawUnsafe(`
-        INSERT INTO "${schema}"."Owner" ("id", "email", "name", "password", "createdAt")
-        VALUES (gen_random_uuid(), '${data.ownerEmail}', '${data.name} Owner', '${hashedPassword}', CURRENT_TIMESTAMP);
-      `);
-
+      } catch (e) {
+        if (!e.message.includes('already exists')) throw e;
+      }
+      await client.query(
+        `INSERT INTO "${schema}"."Owner" ("id", "email", "name", "password", "createdAt") VALUES (gen_random_uuid(), $1, $2, $3, CURRENT_TIMESTAMP)`,
+        [data.ownerEmail, `${data.name} Owner`, hashedPassword],
+      );
+      await client.query('COMMIT');
       return tenant;
     } catch (error) {
-      // Em caso de erro, remover o tenant criado
-      await this.prisma.tenant.delete({
-        where: { id: tenant.id },
-      });
-
-      // Tentar remover o schema para limpar recursos
-      try {
-        await this.prisma.$executeRawUnsafe(
-          `DROP SCHEMA IF EXISTS "${schema}" CASCADE;`,
-        );
-      } catch {}
-
+      await client.query('ROLLBACK');
+      await client.query(`DELETE FROM public."Tenant" WHERE schema = $1`, [
+        schema,
+      ]);
+      await client.query(`DROP SCHEMA IF EXISTS "${schema}" CASCADE`);
       throw error;
+    } finally {
+      client.release();
     }
   }
 
-  async getTenantById(id: string): Promise<Tenant | null> {
-    return this.prisma.tenant.findUnique({
-      where: { id },
-    });
+  async getTenantById(id: string): Promise<any> {
+    const client = await this.postgres.getClient();
+    try {
+      const result = await client.query(
+        `SELECT * FROM public."Tenant" WHERE id = $1`,
+        [id],
+      );
+      return result.rows[0] || null;
+    } finally {
+      client.release();
+    }
   }
 
-  async getTenantBySchema(schema: string): Promise<Tenant | null> {
-    return this.prisma.tenant.findUnique({
-      where: { schema },
-    });
+  async getTenantBySchema(schema: string): Promise<any> {
+    const client = await this.postgres.getClient();
+    try {
+      const result = await client.query(
+        `SELECT * FROM public."Tenant" WHERE schema = $1`,
+        [schema],
+      );
+      return result.rows[0] || null;
+    } finally {
+      client.release();
+    }
   }
 
-  async getTenantPrismaClient(tenantIdOrSchema: string): Promise<PrismaClient> {
-    // Verificar se já temos um cliente para este tenant
-    if (this.tenantPrismaClients.has(tenantIdOrSchema)) {
-      return this.tenantPrismaClients.get(tenantIdOrSchema)!;
+  async listTenants(): Promise<any[]> {
+    const client = await this.postgres.getClient();
+    try {
+      const result = await client.query(`SELECT * FROM public."Tenant"`);
+      return result.rows;
+    } finally {
+      client.release();
     }
-
-    // Determinar se o parâmetro é um ID ou um schema
-    let tenant: Tenant | null;
-
-    // Verificar se é um UUID válido (formato de ID)
-    if (
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-        tenantIdOrSchema,
-      )
-    ) {
-      tenant = await this.getTenantById(tenantIdOrSchema);
-    } else {
-      tenant = await this.getTenantBySchema(tenantIdOrSchema);
-    }
-
-    if (!tenant) {
-      throw new Error(`Tenant not found: ${tenantIdOrSchema}`);
-    }
-
-    // Criar um novo cliente Prisma para o schema deste tenant
-    const databaseUrl = this.configService.get<string>('DATABASE_URL');
-    const prismaClient = new PrismaClient({
-      datasources: {
-        db: {
-          url: databaseUrl,
-        },
-      },
-    });
-
-    // Configurar o schema para as operações
-    await prismaClient.$executeRawUnsafe(
-      `SET search_path TO "${tenant.schema}"`,
-    );
-
-    // Armazenar o cliente para uso futuro
-    this.tenantPrismaClients.set(tenant.id, prismaClient);
-    this.tenantPrismaClients.set(tenant.schema, prismaClient);
-
-    return prismaClient;
-  }
-
-  async listTenants(): Promise<Tenant[]> {
-    return this.prisma.tenant.findMany({
-      include: {
-        plan: true,
-      },
-    });
   }
 }

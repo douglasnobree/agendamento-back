@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Get, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  UseGuards,
+  Inject,
+} from '@nestjs/common';
 import { TenantService } from '../../infra/prisma/tenant.service';
 import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
 import { RolesGuard } from '../../infra/auth/roles.guard';
@@ -12,6 +20,9 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { CreateTenantDto, TenantResponseDto } from '../dtos/tenant.dto';
+import { UsecaseProxyModule } from '../../application/usecases/usecase-proxy.module';
+import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
+import { ListTenantsUseCase } from '../../application/usecases/Tenants/tenant-useCase-list';
 
 @Controller('admin/tenants')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -19,7 +30,11 @@ import { CreateTenantDto, TenantResponseDto } from '../dtos/tenant.dto';
 @ApiTags('Tenants')
 @ApiBearerAuth()
 export class TenantController {
-  constructor(private readonly tenantService: TenantService) {}
+  constructor(
+    @Inject(UsecaseProxyModule.LIST_TENANTS_USE_CASE)
+    private readonly listTenantsUseCaseProxy: UseCaseProxy<ListTenantsUseCase>,
+    private readonly tenantService: TenantService,
+  ) {}
   @Post()
   @ApiOperation({ summary: 'Criar um novo tenant' })
   @ApiResponse({ status: 201, description: 'Tenant criado com sucesso' })
@@ -38,11 +53,19 @@ export class TenantController {
   @ApiResponse({
     status: 200,
     description: 'Lista de tenants retornada com sucesso',
+    type: TenantResponseDto,
+    isArray: true,
   })
-  @ApiResponse({ status: 401, description: 'Não autorizado' })
-  @ApiResponse({ status: 403, description: 'Acesso proibido' })
   async listTenants() {
-    return this.tenantService.listTenants();
+    const tenants = await this.listTenantsUseCaseProxy.getInstance().execute();
+    return tenants.map((t) => ({
+      id: t.id,
+      name: t.name,
+      schema: t.schema,
+      ownerEmail: t.ownerEmail,
+      planId: t.planId,
+      createdAt: t.createdAt,
+    }));
   }
   @Get(':id')
   @ApiOperation({ summary: 'Obter um tenant pelo ID' })

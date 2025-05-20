@@ -11,8 +11,7 @@ import {
 import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
 import { RolesGuard } from '../../infra/auth/roles.guard';
 import { Roles } from '../../infra/decorators/roles.decorator';
-import { TenantDB } from '../../infra/decorators/tenant-db.decorator';
-import { PrismaClient } from '@prisma/client';
+import { PostgresService } from '../../infra/db/postgres/postgres.service';
 
 class CreateStaffDto {
   name: string;
@@ -30,41 +29,58 @@ class UpdateStaffDto {
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('owner', 'admin')
 export class StaffController {
+  constructor(private readonly postgres: PostgresService) {}
+
   @Get()
-  async findAll(@TenantDB() db: PrismaClient) {
-    return db.staff.findMany();
+  async findAll(req: any) {
+    const tenantSchema = req.tenantSchema;
+    const result = await this.postgres.query(
+      `SELECT * FROM "${tenantSchema}"."Staff"`,
+    );
+    return result.rows;
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string, @TenantDB() db: PrismaClient) {
-    return db.staff.findUnique({
-      where: { id },
-    });
+  async findOne(req: any, @Param('id') id: string) {
+    const tenantSchema = req.tenantSchema;
+    const result = await this.postgres.query(
+      `SELECT * FROM "${tenantSchema}"."Staff" WHERE id = $1`,
+      [id],
+    );
+    return result.rows[0];
   }
 
   @Post()
-  async create(@Body() data: CreateStaffDto, @TenantDB() db: PrismaClient) {
-    return db.staff.create({
-      data,
-    });
+  async create(req: any, @Body() data: CreateStaffDto) {
+    const tenantSchema = req.tenantSchema;
+    const result = await this.postgres.query(
+      `INSERT INTO "${tenantSchema}"."Staff" (id, name, email, role, createdAt) VALUES (gen_random_uuid(), $1, $2, $3, CURRENT_TIMESTAMP) RETURNING *`,
+      [data.name, data.email, data.role],
+    );
+    return result.rows[0];
   }
 
   @Put(':id')
   async update(
+    req: any,
     @Param('id') id: string,
     @Body() data: UpdateStaffDto,
-    @TenantDB() db: PrismaClient,
   ) {
-    return db.staff.update({
-      where: { id },
-      data,
-    });
+    const tenantSchema = req.tenantSchema;
+    const result = await this.postgres.query(
+      `UPDATE "${tenantSchema}"."Staff" SET name = $1, email = $2, role = $3 WHERE id = $4 RETURNING *`,
+      [data.name, data.email, data.role, id],
+    );
+    return result.rows[0];
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @TenantDB() db: PrismaClient) {
-    return db.staff.delete({
-      where: { id },
-    });
+  async remove(req: any, @Param('id') id: string) {
+    const tenantSchema = req.tenantSchema;
+    await this.postgres.query(
+      `DELETE FROM "${tenantSchema}"."Staff" WHERE id = $1`,
+      [id],
+    );
+    return { success: true };
   }
 }

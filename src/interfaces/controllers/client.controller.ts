@@ -7,11 +7,20 @@ import {
   Put,
   Delete,
   UseGuards,
+  Inject,
+  Req,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
 import { RolesGuard } from '../../infra/auth/roles.guard';
 import { Roles } from '../../infra/decorators/roles.decorator';
-import { PostgresService } from '../../infra/db/postgres/postgres.service';
+import { UsecaseProxyModule } from '../../application/usecases/usecase-proxy.module';
+import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
+import { ListClientsUseCase } from '../../application/usecases/Clients/client-useCase-list';
+import { GetClientByIdUseCase } from '../../application/usecases/Clients/client-useCase-getById';
+import { CreateClientUseCase } from '../../application/usecases/Clients/client-useCase-create';
+import { UpdateClientUseCase } from '../../application/usecases/Clients/client-useCase-update';
+import { RemoveClientUseCase } from '../../application/usecases/Clients/client-useCase-remove';
+import { CreateClientDto, UpdateClientDto } from '../dtos/client.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -21,44 +30,6 @@ import {
   ApiBearerAuth,
   ApiHeader,
 } from '@nestjs/swagger';
-
-class CreateClientDto {
-  @ApiProperty({ description: 'Nome do cliente', example: 'João Silva' })
-  name: string;
-
-  @ApiProperty({ description: 'Email do cliente', example: 'joao@example.com' })
-  email: string;
-
-  @ApiProperty({
-    description: 'Telefone do cliente',
-    example: '11987654321',
-    required: false,
-  })
-  phone?: string;
-}
-
-class UpdateClientDto {
-  @ApiProperty({
-    description: 'Nome do cliente',
-    example: 'João Silva',
-    required: false,
-  })
-  name?: string;
-
-  @ApiProperty({
-    description: 'Email do cliente',
-    example: 'joao@example.com',
-    required: false,
-  })
-  email?: string;
-
-  @ApiProperty({
-    description: 'Telefone do cliente',
-    example: '11987654321',
-    required: false,
-  })
-  phone?: string;
-}
 
 @Controller('api/tenant/clients')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -71,7 +42,18 @@ class UpdateClientDto {
   schema: { type: 'string' },
 })
 export class ClientController {
-  constructor(private readonly postgres: PostgresService) {}
+  constructor(
+    @Inject(UsecaseProxyModule.LIST_CLIENTS_USE_CASE)
+    private readonly listClientsUseCaseProxy: UseCaseProxy<ListClientsUseCase>,
+    @Inject(UsecaseProxyModule.GET_CLIENT_BY_ID_USE_CASE)
+    private readonly getClientByIdUseCaseProxy: UseCaseProxy<GetClientByIdUseCase>,
+    @Inject(UsecaseProxyModule.CREATE_CLIENT_USE_CASE)
+    private readonly createClientUseCaseProxy: UseCaseProxy<CreateClientUseCase>,
+    @Inject(UsecaseProxyModule.UPDATE_CLIENT_USE_CASE)
+    private readonly updateClientUseCaseProxy: UseCaseProxy<UpdateClientUseCase>,
+    @Inject(UsecaseProxyModule.REMOVE_CLIENT_USE_CASE)
+    private readonly removeClientUseCaseProxy: UseCaseProxy<RemoveClientUseCase>,
+  ) {}
 
   @Get()
   @Roles('owner', 'admin')
@@ -82,12 +64,10 @@ export class ClientController {
   })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   @ApiResponse({ status: 403, description: 'Acesso proibido' })
-  async findAll(req: any) {
-    const tenantSchema = req.tenantSchema;
-    const result = await this.postgres.query(
-      `SELECT * FROM "${tenantSchema}"."Client"`,
-    );
-    return result.rows;
+  async findAll(@Req() req: Request) {
+    const tenantSchema = (req as any).tenantSchema;
+    console.log('tenantSchema', tenantSchema);
+    return this.listClientsUseCaseProxy.getInstance().execute(tenantSchema);
   }
 
   @Get(':id')
@@ -98,13 +78,11 @@ export class ClientController {
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   @ApiResponse({ status: 403, description: 'Acesso proibido' })
   @ApiResponse({ status: 404, description: 'Cliente não encontrado' })
-  async findOne(req: any, @Param('id') id: string) {
-    const tenantSchema = req.tenantSchema;
-    const result = await this.postgres.query(
-      `SELECT * FROM "${tenantSchema}"."Client" WHERE id = $1`,
-      [id],
-    );
-    return result.rows[0];
+  async findOne(@Req() req: Request, @Param('id') id: string) {
+    const tenantSchema = (req as any).tenantSchema;
+    return this.getClientByIdUseCaseProxy
+      .getInstance()
+      .execute(tenantSchema, id);
   }
 
   @Post()
@@ -114,38 +92,31 @@ export class ClientController {
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   @ApiResponse({ status: 403, description: 'Acesso proibido' })
-  async create(req: any, @Body() data: CreateClientDto) {
-    const tenantSchema = req.tenantSchema;
-    const result = await this.postgres.query(
-      `INSERT INTO "${tenantSchema}"."Client" (id, email, name, phone, createdAt) VALUES (gen_random_uuid(), $1, $2, $3, CURRENT_TIMESTAMP) RETURNING *`,
-      [data.email, data.name, data.phone],
-    );
-    return result.rows[0];
+  async create(@Req() req: Request, @Body() data: CreateClientDto) {
+    const tenantSchema = (req as any).tenantSchema;
+    return this.createClientUseCaseProxy
+      .getInstance()
+      .execute(tenantSchema, data);
   }
 
   @Put(':id')
   @Roles('owner', 'admin')
   async update(
-    req: any,
+    @Req() req: Request,
     @Param('id') id: string,
     @Body() data: UpdateClientDto,
   ) {
-    const tenantSchema = req.tenantSchema;
-    const result = await this.postgres.query(
-      `UPDATE "${tenantSchema}"."Client" SET name = $1, email = $2, phone = $3 WHERE id = $4 RETURNING *`,
-      [data.name, data.email, data.phone, id],
-    );
-    return result.rows[0];
+    const tenantSchema = (req as any).tenantSchema;
+    return this.updateClientUseCaseProxy
+      .getInstance()
+      .execute(tenantSchema, { id, ...data });
   }
 
   @Delete(':id')
   @Roles('owner', 'admin')
-  async remove(req: any, @Param('id') id: string) {
-    const tenantSchema = req.tenantSchema;
-    await this.postgres.query(
-      `DELETE FROM "${tenantSchema}"."Client" WHERE id = $1`,
-      [id],
-    );
+  async remove(@Req() req: Request, @Param('id') id: string) {
+    const tenantSchema = (req as any).tenantSchema;
+    await this.removeClientUseCaseProxy.getInstance().execute(tenantSchema, id);
     return { success: true };
   }
 }

@@ -12,6 +12,12 @@ import { GetServiceByIdUseCase } from './Services/service-useCase-getById';
 import { CreateServiceUseCase } from './Services/service-useCase-create';
 import { UpdateServiceUseCase } from './Services/service-useCase-update';
 import { RemoveServiceUseCase } from './Services/service-useCase-remove';
+import { ClientRepositoryPostgres } from '../../infra/db/postgres/repositories/client.repository';
+import { ListClientsUseCase } from './Clients/client-useCase-list';
+import { GetClientByIdUseCase } from './Clients/client-useCase-getById';
+import { CreateClientUseCase } from './Clients/client-useCase-create';
+import { UpdateClientUseCase } from './Clients/client-useCase-update';
+import { RemoveClientUseCase } from './Clients/client-useCase-remove';
 
 @Module({
   imports: [PostgresModule],
@@ -25,6 +31,11 @@ export class UsecaseProxyModule {
   static CREATE_SERVICE_USE_CASE = 'createServiceUsecaseProxy';
   static UPDATE_SERVICE_USE_CASE = 'updateServiceUsecaseProxy';
   static REMOVE_SERVICE_USE_CASE = 'removeServiceUsecaseProxy';
+  static LIST_CLIENTS_USE_CASE = 'listClientsUsecaseProxy';
+  static GET_CLIENT_BY_ID_USE_CASE = 'getClientByIdUsecaseProxy';
+  static CREATE_CLIENT_USE_CASE = 'createClientUsecaseProxy';
+  static UPDATE_CLIENT_USE_CASE = 'updateClientUsecaseProxy';
+  static REMOVE_CLIENT_USE_CASE = 'removeClientUsecaseProxy';
 
   static register(): DynamicModule {
     return {
@@ -84,6 +95,37 @@ export class UsecaseProxyModule {
           useFactory: (serviceRepository: ServiceRepositoryPostgres) =>
             new UseCaseProxy(new RemoveServiceUseCase(serviceRepository)),
         },
+        // --- CLIENTS ---
+        {
+          inject: [ClientRepositoryPostgres],
+          provide: UsecaseProxyModule.LIST_CLIENTS_USE_CASE,
+          useFactory: (clientRepository: ClientRepositoryPostgres) =>
+            new UseCaseProxy(new ListClientsUseCase(clientRepository)),
+        },
+        {
+          inject: [ClientRepositoryPostgres],
+          provide: UsecaseProxyModule.GET_CLIENT_BY_ID_USE_CASE,
+          useFactory: (clientRepository: ClientRepositoryPostgres) =>
+            new UseCaseProxy(new GetClientByIdUseCase(clientRepository)),
+        },
+        {
+          inject: [ClientRepositoryPostgres],
+          provide: UsecaseProxyModule.CREATE_CLIENT_USE_CASE,
+          useFactory: (clientRepository: ClientRepositoryPostgres) =>
+            new UseCaseProxy(new CreateClientUseCase(clientRepository)),
+        },
+        {
+          inject: [ClientRepositoryPostgres],
+          provide: UsecaseProxyModule.UPDATE_CLIENT_USE_CASE,
+          useFactory: (clientRepository: ClientRepositoryPostgres) =>
+            new UseCaseProxy(new UpdateClientUseCase(clientRepository)),
+        },
+        {
+          inject: [ClientRepositoryPostgres],
+          provide: UsecaseProxyModule.REMOVE_CLIENT_USE_CASE,
+          useFactory: (clientRepository: ClientRepositoryPostgres) =>
+            new UseCaseProxy(new RemoveClientUseCase(clientRepository)),
+        },
       ],
       exports: [
         UsecaseProxyModule.CREATE_TENANT_USE_CASE,
@@ -94,6 +136,11 @@ export class UsecaseProxyModule {
         UsecaseProxyModule.CREATE_SERVICE_USE_CASE,
         UsecaseProxyModule.UPDATE_SERVICE_USE_CASE,
         UsecaseProxyModule.REMOVE_SERVICE_USE_CASE,
+        UsecaseProxyModule.LIST_CLIENTS_USE_CASE,
+        UsecaseProxyModule.GET_CLIENT_BY_ID_USE_CASE,
+        UsecaseProxyModule.CREATE_CLIENT_USE_CASE,
+        UsecaseProxyModule.UPDATE_CLIENT_USE_CASE,
+        UsecaseProxyModule.REMOVE_CLIENT_USE_CASE,
       ],
     };
   }

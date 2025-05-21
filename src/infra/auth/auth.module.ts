@@ -5,6 +5,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { PostgresModule } from '../db/postgres/postgres.module';
+import { AuthUsecaseProxyModule } from '../../application/usecases/Auth/auth-usecase-proxy.module';
+import { PlatformAdminRepositoryPostgres } from '../db/postgres/repositories/platform-admin.repository';
+import { OwnerRepositoryPostgres } from '../db/postgres/repositories/owner.repository';
+import { ClientRepositoryPostgres } from '../db/postgres/repositories/client.repository';
+import { StaffRepositoryPostgres } from '../db/postgres/repositories/staff.repository';
+import { TenantRepositoryPostgres } from '../db/postgres/repositories/tenant.repository';
 
 @Module({
   imports: [
@@ -20,6 +26,7 @@ import { PostgresModule } from '../db/postgres/postgres.module';
       }),
     }),
     PostgresModule,
+    AuthUsecaseProxyModule.register(),
   ],
   providers: [AuthService, JwtStrategy],
   exports: [AuthService],

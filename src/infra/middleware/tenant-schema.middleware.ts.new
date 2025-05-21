@@ -26,9 +26,7 @@ export class TenantSchemaMiddleware implements NestMiddleware {
       let schema = tenantId;
       if (!tenantId.startsWith('tenant_')) {
         try {
-          const tenant = await this.getTenantByIdUseCaseProxy
-            .getInstance()
-            .execute(tenantId);
+          const tenant = await this.getTenantByIdUseCaseProxy.getInstance().execute(tenantId);
           schema = tenant.schema;
         } catch (error) {
           return res.status(404).json({ message: 'Tenant não encontrado' });
@@ -36,14 +34,12 @@ export class TenantSchemaMiddleware implements NestMiddleware {
       } else {
         try {
           // Verificar se o schema existe
-          await this.getTenantBySchemaUseCaseProxy
-            .getInstance()
-            .execute(schema);
+          await this.getTenantBySchemaUseCaseProxy.getInstance().execute(schema);
         } catch (error) {
           return res.status(404).json({ message: 'Tenant não encontrado' });
         }
       }
-
+      
       // Disponibiliza o schema na request
       (req as any).tenantSchema = schema;
       console.log(`Tenant schema identificado: ${schema}`);

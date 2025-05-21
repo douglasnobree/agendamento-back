@@ -36,7 +36,8 @@ export class AuthController {
   async login(@Body() loginDto: LoginDto, @Req() req: Request) {
     const tenantSchema = (req as any).tenantSchema;
     let user;
-
+    console.log('tenantSchema', tenantSchema);
+    console.log('loginDto', loginDto);
     switch (loginDto.userType) {
       case 'admin':
         user = await this.authService.validatePlatformAdmin(

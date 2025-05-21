@@ -1,30 +1,32 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { ServiceRepository } from '../../../domain/repositoriesInterface/service.repository-interface';
 import { Service } from '../../../domain/entities/service.entity';
+import { UseCase } from '../useCase';
+import { UpdateServiceInputDto } from 'src/application/dtos/Services/update-service.dto'; 
 
-export type UpdateServiceInput = {
-  id: string;
-  name?: string;
-  description?: string;
-  duration?: number;
-  price?: number;
-};
+export interface UpdateServiceUseCaseInputDto {
+  schema: string;
+  data: UpdateServiceInputDto;
+}
 
 @Injectable()
-export class UpdateServiceUseCase {
+export class UpdateServiceUseCase
+  implements UseCase<UpdateServiceUseCaseInputDto, Service>
+{
   constructor(
     @Inject('ServiceRepository')
     private readonly serviceRepository: ServiceRepository,
   ) {}
 
-  async execute(schema: string, input: UpdateServiceInput): Promise<Service> {
-    const existing = await this.serviceRepository.findById(schema, input.id);
+  async execute(input: UpdateServiceUseCaseInputDto): Promise<Service> {
+    const { schema, data } = input;
+    const existing = await this.serviceRepository.findById(schema, data.id);
     if (!existing) throw new NotFoundException('Serviço não encontrado');
     const updated = existing.update({
-      name: input.name,
-      description: input.description,
-      duration: input.duration,
-      price: input.price,
+      name: data.name,
+      description: data.description,
+      duration: data.duration,
+      price: data.price,
     });
     await this.serviceRepository.update(schema, updated);
     return updated;

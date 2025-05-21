@@ -8,30 +8,27 @@ import {
   Delete,
   UseGuards,
   Query,
+  Inject,
+  Req,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
 import { RolesGuard } from '../../infra/auth/roles.guard';
 import { Roles } from '../../infra/decorators/roles.decorator';
-import { PostgresService } from '../../infra/db/postgres/postgres.service';
+import { UsecaseProxyModule } from '../../application/usecases/usecase-proxy.module';
+import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
+import { ListAppointmentsUseCase } from '../../application/usecases/Appointments/appointment-useCase-list';
+import { GetAppointmentByIdUseCase } from '../../application/usecases/Appointments/appointment-useCase-getById';
+import { CreateAppointmentUseCase } from '../../application/usecases/Appointments/appointment-useCase-create';
+import { UpdateAppointmentUseCase } from '../../application/usecases/Appointments/appointment-useCase-update';
+import { RemoveAppointmentUseCase } from '../../application/usecases/Appointments/appointment-useCase-remove';
+import {
+  CreateAppointmentDto,
+  UpdateAppointmentDto,
+} from '../dtos/appointment.dto';
 import { ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
+import { GetAppointmentByClientIdUseCase } from 'src/application/usecases/Appointments/appointment-useCase-getByClientId';
 
-class CreateAppointmentDto {
-  clientId: string;
-  serviceId: string;
-  staffId: string;
-  scheduledAt: Date;
-  status: string; // 'pending' | 'confirmed' | 'cancelled'
-}
-
-class UpdateAppointmentDto {
-  clientId?: string;
-  serviceId?: string;
-  staffId?: string;
-  scheduledAt?: Date;
-  status?: string;
-}
-
-@Controller('tenant/appointments')
+@Controller('api/tenant/appointments')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 @ApiHeader({
@@ -41,106 +38,82 @@ class UpdateAppointmentDto {
   schema: { type: 'string' },
 })
 export class AppointmentController {
-  constructor(private readonly postgres: PostgresService) {}
+  constructor(
+    @Inject(UsecaseProxyModule.LIST_APPOINTMENTS_USE_CASE)
+    private readonly listAppointmentsUseCaseProxy: UseCaseProxy<ListAppointmentsUseCase>,
+    @Inject(UsecaseProxyModule.GET_APPOINTMENT_BY_ID_USE_CASE)
+    private readonly getAppointmentByIdUseCaseProxy: UseCaseProxy<GetAppointmentByIdUseCase>,
+    @Inject(UsecaseProxyModule.CREATE_APPOINTMENT_USE_CASE)
+    private readonly createAppointmentUseCaseProxy: UseCaseProxy<CreateAppointmentUseCase>,
+    @Inject(UsecaseProxyModule.UPDATE_APPOINTMENT_USE_CASE)
+    private readonly updateAppointmentUseCaseProxy: UseCaseProxy<UpdateAppointmentUseCase>,
+    @Inject(UsecaseProxyModule.REMOVE_APPOINTMENT_USE_CASE)
+    private readonly removeAppointmentUseCaseProxy: UseCaseProxy<RemoveAppointmentUseCase>,
+    @Inject(UsecaseProxyModule.GET_APPOINTMENT_BY_CLIENTID_USE_CASE)
+    private readonly getAppointmentByClientIdUseCaseProxy: UseCaseProxy<GetAppointmentByClientIdUseCase>,
+  ) {}
 
   @Get()
   @Roles('owner', 'admin')
-  async findAll(
-    req: any,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-    @Query('status') status?: string,
-  ) {
-    const tenantSchema = req.tenantSchema;
-    let query = `SELECT * FROM "${tenantSchema}"."Appointment"`;
-    const params: any[] = [];
-    const where: string[] = [];
-    if (startDate && endDate) {
-      params.push(startDate, endDate);
-      where.push(
-        `scheduledAt BETWEEN $${params.length - 1} AND $${params.length}`,
-      );
-    }
-    if (status) {
-      params.push(status);
-      where.push(`status = $${params.length}`);
-    }
-    if (where.length) {
-      query += ' WHERE ' + where.join(' AND ');
-    }
-    const result = await this.postgres.query(query, params);
-    return result.rows;
+  async findAll(@Req() req: Request) {
+    const tenantSchema = (req as any).tenantSchema;
+    console.log('tenantSchema', tenantSchema);
+    return this.listAppointmentsUseCaseProxy
+      .getInstance()
+      .execute(tenantSchema);
   }
 
   @Get('client/:clientId')
   @Roles('owner', 'admin', 'client')
-  async findByClient(req: any, @Param('clientId') clientId: string) {
-    const tenantSchema = req.tenantSchema;
-    const result = await this.postgres.query(
-      `SELECT * FROM "${tenantSchema}"."Appointment" WHERE clientId = $1`,
-      [clientId],
-    );
-    return result.rows;
+  async findByClient(@Req() req: Request, @Param('clientId') clientId: string) {
+    // Para busca por clientId, pode ser implementado um use case específico se necessário
+
+    const tenantSchema = (req as any).tenantSchema;
+
+    const all = await this.listAppointmentsUseCaseProxy
+      .getInstance()
+      .execute(tenantSchema);
+    return all.filter((a) => a.clientId === clientId);
   }
 
-  @Get(':id')
+  @Get(':appointmentId')
   @Roles('owner', 'admin', 'client')
-  async findOne(req: any, @Param('id') id: string) {
-    const tenantSchema = req.tenantSchema;
-    const result = await this.postgres.query(
-      `SELECT * FROM "${tenantSchema}"."Appointment" WHERE id = $1`,
-      [id],
-    );
-    return result.rows[0];
+  async findOne(@Req() req: Request, @Param('appointmentId') id: string) {
+    const tenantSchema = (req as any).tenantSchema;
+    return this.getAppointmentByIdUseCaseProxy 
+      .getInstance()
+      .execute(tenantSchema, id);
   }
 
   @Post()
   @Roles('owner', 'admin', 'client')
-  async create(req: any, @Body() data: CreateAppointmentDto) {
-    const tenantSchema = req.tenantSchema;
-    const result = await this.postgres.query(
-      `INSERT INTO "${tenantSchema}"."Appointment" (id, clientId, serviceId, staffId, scheduledAt, status, createdAt) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, CURRENT_TIMESTAMP) RETURNING *`,
-      [
-        data.clientId,
-        data.serviceId,
-        data.staffId,
-        data.scheduledAt,
-        data.status,
-      ],
-    );
-    return result.rows[0];
+  async create(@Req() req: Request, @Body() data: CreateAppointmentDto) {
+    const tenantSchema = (req as any).tenantSchema;
+    return this.createAppointmentUseCaseProxy
+      .getInstance()
+      .execute(tenantSchema, data);
   }
 
   @Put(':id')
   @Roles('owner', 'admin', 'client')
   async update(
-    req: any,
+    @Req() req: Request,
     @Param('id') id: string,
     @Body() data: UpdateAppointmentDto,
   ) {
-    const tenantSchema = req.tenantSchema;
-    const result = await this.postgres.query(
-      `UPDATE "${tenantSchema}"."Appointment" SET clientId = $1, serviceId = $2, staffId = $3, scheduledAt = $4, status = $5 WHERE id = $6 RETURNING *`,
-      [
-        data.clientId,
-        data.serviceId,
-        data.staffId,
-        data.scheduledAt,
-        data.status,
-        id,
-      ],
-    );
-    return result.rows[0];
+    const tenantSchema = (req as any).tenantSchema;
+    return this.updateAppointmentUseCaseProxy
+      .getInstance()
+      .execute(tenantSchema, { id, ...data });
   }
 
   @Delete(':id')
   @Roles('owner', 'admin')
-  async remove(req: any, @Param('id') id: string) {
-    const tenantSchema = req.tenantSchema;
-    await this.postgres.query(
-      `DELETE FROM "${tenantSchema}"."Appointment" WHERE id = $1`,
-      [id],
-    );
+  async remove(@Req() req: Request, @Param('id') id: string) {
+    const tenantSchema = (req as any).tenantSchema;
+    await this.removeAppointmentUseCaseProxy
+      .getInstance()
+      .execute(tenantSchema, id);
     return { success: true };
   }
 }

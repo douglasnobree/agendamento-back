@@ -24,6 +24,13 @@ import { GetStaffByIdUseCase } from './Staff/staff-useCase-getById';
 import { CreateStaffUseCase } from './Staff/staff-useCase-create';
 import { UpdateStaffUseCase } from './Staff/staff-useCase-update';
 import { RemoveStaffUseCase } from './Staff/staff-useCase-remove';
+import { AppointmentRepositoryPostgres } from '../../infra/db/postgres/repositories/appointment.repository';
+import { ListAppointmentsUseCase } from './Appointments/appointment-useCase-list';
+import { GetAppointmentByIdUseCase } from './Appointments/appointment-useCase-getById';
+import { CreateAppointmentUseCase } from './Appointments/appointment-useCase-create';
+import { UpdateAppointmentUseCase } from './Appointments/appointment-useCase-update';
+import { RemoveAppointmentUseCase } from './Appointments/appointment-useCase-remove';
+import { GetAppointmentByClientIdUseCase } from './Appointments/appointment-useCase-getByClientId';
 
 @Module({
   imports: [PostgresModule],
@@ -47,6 +54,12 @@ export class UsecaseProxyModule {
   static CREATE_STAFF_USE_CASE = 'createStaffUsecaseProxy';
   static UPDATE_STAFF_USE_CASE = 'updateStaffUsecaseProxy';
   static REMOVE_STAFF_USE_CASE = 'removeStaffUsecaseProxy';
+  static LIST_APPOINTMENTS_USE_CASE = 'listAppointmentsUsecaseProxy';
+  static GET_APPOINTMENT_BY_ID_USE_CASE = 'getAppointmentByIdUsecaseProxy';
+  static CREATE_APPOINTMENT_USE_CASE = 'createAppointmentUsecaseProxy';
+  static UPDATE_APPOINTMENT_USE_CASE = 'updateAppointmentUsecaseProxy';
+  static REMOVE_APPOINTMENT_USE_CASE = 'removeAppointmentUsecaseProxy';
+  static GET_APPOINTMENT_BY_CLIENTID_USE_CASE = 'getAppointmentByClientIdUsecaseProxy';
 
   static register(): DynamicModule {
     return {
@@ -168,6 +181,55 @@ export class UsecaseProxyModule {
           useFactory: (staffRepository: StaffRepositoryPostgres) =>
             new UseCaseProxy(new RemoveStaffUseCase(staffRepository)),
         },
+        // --- APPOINTMENTS ---
+        {
+          inject: [AppointmentRepositoryPostgres],
+          provide: UsecaseProxyModule.LIST_APPOINTMENTS_USE_CASE,
+          useFactory: (appointmentRepository: AppointmentRepositoryPostgres) =>
+            new UseCaseProxy(
+              new ListAppointmentsUseCase(appointmentRepository),
+            ),
+        },
+        {
+          inject: [AppointmentRepositoryPostgres],
+          provide: UsecaseProxyModule.GET_APPOINTMENT_BY_ID_USE_CASE,
+          useFactory: (appointmentRepository: AppointmentRepositoryPostgres) =>
+            new UseCaseProxy(
+              new GetAppointmentByIdUseCase(appointmentRepository),
+            ),
+        },
+        {
+          inject: [AppointmentRepositoryPostgres],
+          provide: UsecaseProxyModule.CREATE_APPOINTMENT_USE_CASE,
+          useFactory: (appointmentRepository: AppointmentRepositoryPostgres) =>
+            new UseCaseProxy(
+              new CreateAppointmentUseCase(appointmentRepository),
+            ),
+        },
+        {
+          inject: [AppointmentRepositoryPostgres],
+          provide: UsecaseProxyModule.UPDATE_APPOINTMENT_USE_CASE,
+          useFactory: (appointmentRepository: AppointmentRepositoryPostgres) =>
+            new UseCaseProxy(
+              new UpdateAppointmentUseCase(appointmentRepository),
+            ),
+        },
+        {
+          inject: [AppointmentRepositoryPostgres],
+          provide: UsecaseProxyModule.REMOVE_APPOINTMENT_USE_CASE,
+          useFactory: (appointmentRepository: AppointmentRepositoryPostgres) =>
+            new UseCaseProxy(
+              new RemoveAppointmentUseCase(appointmentRepository),
+            ),
+        },
+        {
+          inject: [AppointmentRepositoryPostgres],
+          provide: UsecaseProxyModule.GET_APPOINTMENT_BY_CLIENTID_USE_CASE,
+          useFactory: (appointmentRepository: AppointmentRepositoryPostgres) =>
+            new UseCaseProxy(
+              new GetAppointmentByClientIdUseCase(appointmentRepository),
+            ),
+        },
       ],
       exports: [
         UsecaseProxyModule.CREATE_TENANT_USE_CASE,
@@ -188,6 +250,12 @@ export class UsecaseProxyModule {
         UsecaseProxyModule.CREATE_STAFF_USE_CASE,
         UsecaseProxyModule.UPDATE_STAFF_USE_CASE,
         UsecaseProxyModule.REMOVE_STAFF_USE_CASE,
+        UsecaseProxyModule.LIST_APPOINTMENTS_USE_CASE,
+        UsecaseProxyModule.GET_APPOINTMENT_BY_ID_USE_CASE,
+        UsecaseProxyModule.CREATE_APPOINTMENT_USE_CASE,
+        UsecaseProxyModule.UPDATE_APPOINTMENT_USE_CASE,
+        UsecaseProxyModule.REMOVE_APPOINTMENT_USE_CASE,
+        UsecaseProxyModule.GET_APPOINTMENT_BY_CLIENTID_USE_CASE,
       ],
     };
   }

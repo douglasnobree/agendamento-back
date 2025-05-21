@@ -12,11 +12,19 @@ export class AppointmentRepositoryPostgres implements AppointmentRepository {
 
   async findById(schema: string, id: string): Promise<Appointment | null> {
     const result = await this.postgres.query<AppointmentProps>(
-      `SELECT * FROM "${schema}"."Appointment" WHERE id = $1`,
+      `SELECT * FROM "${schema}"."Appointment" WHERE id = $1`, //TODO - trocar para id do cliente
       [id],
     );
     if (!result.rows[0]) return null;
     return Appointment.fromPersistence(result.rows[0]);
+  }
+
+  async findAppointmentsByClientId(schema: string, clientId: string): Promise<Appointment[]> {
+    const result = await this.postgres.query<AppointmentProps>(
+      `SELECT * FROM "${schema}"."Appointment" WHERE "clientId" = $1`,
+      [clientId],
+    );
+    return result.rows.map(Appointment.fromPersistence);
   }
 
   async findAll(schema: string): Promise<Appointment[]> {

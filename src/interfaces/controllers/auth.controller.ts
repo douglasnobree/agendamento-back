@@ -1,4 +1,4 @@
-import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException, Req } from '@nestjs/common';
 import { AuthService } from '../../infra/auth/auth.service';
 import { TenantService } from '../../infra/prisma/tenant.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
@@ -31,7 +31,8 @@ export class AuthController {
     status: 401,
     description: 'Credenciais inválidas',
   })
-  async login(@Body() loginDto: LoginDto) {
+  async login(@Body() loginDto: LoginDto, @Req() req: Request) {
+    const tenantSchema = (req as any).tenantSchema;
     let user;
 
     switch (loginDto.userType) {

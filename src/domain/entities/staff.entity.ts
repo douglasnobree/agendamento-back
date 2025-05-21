@@ -3,8 +3,8 @@ export type StaffProps = {
   name: string;
   role: string;
   email: string;
-  password: string;
   createdAt?: Date;
+  password?: string;
 };
 
 export class Staff {
@@ -24,8 +24,8 @@ export class Staff {
       name,
       role,
       email,
-      password,
       createdAt: new Date(),
+      password,
     });
   }
 

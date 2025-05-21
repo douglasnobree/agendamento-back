@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PostgresService } from '../postgres.service';
 import { Staff, StaffProps } from '../../../../domain/entities/staff.entity';
 import { StaffRepository } from '../../../../domain/repositoriesInterface/staff.repository-interface';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class StaffRepositoryPostgres implements StaffRepository {
@@ -50,5 +51,11 @@ export class StaffRepositoryPostgres implements StaffRepository {
       `UPDATE "${schema}"."Staff" SET name = $1, role = $2, email = $3, password = $4 WHERE id = $5`,
       [props.name, props.role, props.email, props.password, props.id],
     );
+  }
+
+  async hashPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password, salt);
+    return hashedPassword;
   }
 }

@@ -6,4 +6,5 @@ export interface StaffRepository {
   save(schema: string, staff: Staff): Promise<void>;
   remove(schema: string, id: string): Promise<void>;
   update(schema: string, staff: Staff): Promise<void>;
+  hashPassword(password: string): Promise<string>;
 }

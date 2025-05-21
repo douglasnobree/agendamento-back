@@ -67,7 +67,9 @@ export class ServiceController {
   @ApiResponse({ status: 403, description: 'Acesso proibido' })
   async findAll(@Req() req: Request) {
     const tenantSchema = (req as any).tenantSchema;
-    return this.listServicesUseCaseProxy.getInstance().execute(tenantSchema);
+    return this.listServicesUseCaseProxy
+      .getInstance()
+      .execute({ schema: tenantSchema });
   }
 
   @Get(':id')
@@ -82,7 +84,7 @@ export class ServiceController {
     const tenantSchema = (req as any).tenantSchema;
     return this.getServiceByIdUseCaseProxy
       .getInstance()
-      .execute(tenantSchema, id);
+      .execute({ schema: tenantSchema, id });
   }
 
   @Post()
@@ -97,7 +99,7 @@ export class ServiceController {
     console.log('Creating service with data:', data);
     return this.createServiceUseCaseProxy
       .getInstance()
-      .execute(tenantSchema, data);
+      .execute({ schema: tenantSchema, data });
   }
 
   @Put(':id')
@@ -117,7 +119,7 @@ export class ServiceController {
     const tenantSchema = (req as any).tenantSchema;
     return this.updateServiceUseCaseProxy
       .getInstance()
-      .execute(tenantSchema, { id, ...data });
+      .execute({ schema: tenantSchema, data: { id, ...data } });
   }
 
   @Delete(':id')
@@ -132,7 +134,7 @@ export class ServiceController {
     const tenantSchema = (req as any).tenantSchema;
     await this.removeServiceUseCaseProxy
       .getInstance()
-      .execute(tenantSchema, id);
+      .execute({ schema: tenantSchema, id });
     return { success: true };
   }
 }

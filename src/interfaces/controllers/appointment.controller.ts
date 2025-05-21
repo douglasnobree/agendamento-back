@@ -60,19 +60,17 @@ export class AppointmentController {
     console.log('tenantSchema', tenantSchema);
     return this.listAppointmentsUseCaseProxy
       .getInstance()
-      .execute(tenantSchema);
+      .execute({ schema: tenantSchema });
   }
 
   @Get('client/:clientId')
   @Roles('owner', 'admin', 'client')
   async findByClient(@Req() req: Request, @Param('clientId') clientId: string) {
-    // Para busca por clientId, pode ser implementado um use case específico se necessário
-
     const tenantSchema = (req as any).tenantSchema;
 
     const all = await this.listAppointmentsUseCaseProxy
       .getInstance()
-      .execute(tenantSchema);
+      .execute({ schema: tenantSchema });
     return all.filter((a) => a.clientId === clientId);
   }
 
@@ -80,18 +78,20 @@ export class AppointmentController {
   @Roles('owner', 'admin', 'client')
   async findOne(@Req() req: Request, @Param('appointmentId') id: string) {
     const tenantSchema = (req as any).tenantSchema;
-    return this.getAppointmentByIdUseCaseProxy
-      .getInstance()
-      .execute(tenantSchema, id);
+    return this.getAppointmentByIdUseCaseProxy.getInstance().execute({
+      schema: tenantSchema,
+      id,
+    });
   }
 
   @Post()
   @Roles('owner', 'admin', 'client')
   async create(@Req() req: Request, @Body() data: CreateAppointmentDto) {
     const tenantSchema = (req as any).tenantSchema;
-    return this.createAppointmentUseCaseProxy
-      .getInstance()
-      .execute(tenantSchema, data);
+    return this.createAppointmentUseCaseProxy.getInstance().execute({
+      schema: tenantSchema,
+      data,
+    });
   }
 
   @Put(':id')
@@ -102,18 +102,20 @@ export class AppointmentController {
     @Body() data: UpdateAppointmentDto,
   ) {
     const tenantSchema = (req as any).tenantSchema;
-    return this.updateAppointmentUseCaseProxy
-      .getInstance()
-      .execute(tenantSchema, { id, ...data });
+    return this.updateAppointmentUseCaseProxy.getInstance().execute({
+      schema: tenantSchema,
+      data: { id, ...data },
+    });
   }
 
   @Delete(':id')
   @Roles('owner', 'admin')
   async remove(@Req() req: Request, @Param('id') id: string) {
     const tenantSchema = (req as any).tenantSchema;
-    await this.removeAppointmentUseCaseProxy
-      .getInstance()
-      .execute(tenantSchema, id);
+    await this.removeAppointmentUseCaseProxy.getInstance().execute({
+      schema: tenantSchema,
+      id,
+    });
     return { success: true };
   }
 }

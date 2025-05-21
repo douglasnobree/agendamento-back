@@ -7,6 +7,15 @@ import { ClientRepository } from '../../../../domain/repositoriesInterface/clien
 export class ClientRepositoryPostgres implements ClientRepository {
   constructor(private readonly postgres: PostgresService) {}
 
+  async findByEmail(schema: string, email: string): Promise<Client | null> {
+    const result = await this.postgres.query<ClientProps>(
+      `SELECT * FROM "${schema}"."Client" WHERE email = $1`,
+      [email],
+    );
+    if (!result.rows[0]) return null;
+    return Client.fromPersistence(result.rows[0]);
+  }
+
   async findById(schema: string, id: string): Promise<Client | null> {
     const result = await this.postgres.query<ClientProps>(
       `SELECT * FROM "${schema}"."Client" WHERE id = $1`,

@@ -67,7 +67,9 @@ export class ClientController {
   async findAll(@Req() req: Request) {
     const tenantSchema = (req as any).tenantSchema;
     console.log('tenantSchema', tenantSchema);
-    return this.listClientsUseCaseProxy.getInstance().execute(tenantSchema);
+    return this.listClientsUseCaseProxy
+      .getInstance()
+      .execute({ schema: tenantSchema });
   }
 
   @Get(':id')
@@ -80,9 +82,10 @@ export class ClientController {
   @ApiResponse({ status: 404, description: 'Cliente não encontrado' })
   async findOne(@Req() req: Request, @Param('id') id: string) {
     const tenantSchema = (req as any).tenantSchema;
-    return this.getClientByIdUseCaseProxy
-      .getInstance()
-      .execute(tenantSchema, id);
+    return this.getClientByIdUseCaseProxy.getInstance().execute({
+      schema: tenantSchema,
+      id,
+    });
   }
 
   @Post()
@@ -94,9 +97,10 @@ export class ClientController {
   @ApiResponse({ status: 403, description: 'Acesso proibido' })
   async create(@Req() req: Request, @Body() data: CreateClientDto) {
     const tenantSchema = (req as any).tenantSchema;
-    return this.createClientUseCaseProxy
-      .getInstance()
-      .execute(tenantSchema, data);
+    return this.createClientUseCaseProxy.getInstance().execute({
+      schema: tenantSchema,
+      data,
+    });
   }
 
   @Put(':id')
@@ -107,16 +111,20 @@ export class ClientController {
     @Body() data: UpdateClientDto,
   ) {
     const tenantSchema = (req as any).tenantSchema;
-    return this.updateClientUseCaseProxy
-      .getInstance()
-      .execute(tenantSchema, { id, ...data });
+    return this.updateClientUseCaseProxy.getInstance().execute({
+      schema: tenantSchema,
+      data: { id, ...data },
+    });
   }
 
   @Delete(':id')
   @Roles('owner', 'admin')
   async remove(@Req() req: Request, @Param('id') id: string) {
     const tenantSchema = (req as any).tenantSchema;
-    await this.removeClientUseCaseProxy.getInstance().execute(tenantSchema, id);
+    await this.removeClientUseCaseProxy.getInstance().execute({
+      schema: tenantSchema,
+      id,
+    });
     return { success: true };
   }
 }

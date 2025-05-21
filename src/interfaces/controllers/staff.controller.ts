@@ -50,7 +50,9 @@ export class StaffController {
   @Get()
   async findAll(@Req() req: Request) {
     const tenantSchema = (req as any).tenantSchema;
-    return this.listStaffUseCaseProxy.getInstance().execute(tenantSchema);
+    return this.listStaffUseCaseProxy
+      .getInstance()
+      .execute({ schema: tenantSchema });
   }
 
   @Get(':id')
@@ -58,7 +60,7 @@ export class StaffController {
     const tenantSchema = (req as any).tenantSchema;
     return this.getStaffByIdUseCaseProxy
       .getInstance()
-      .execute(tenantSchema, id);
+      .execute({ schema: tenantSchema, id });
   }
 
   @Post()
@@ -67,7 +69,7 @@ export class StaffController {
     console.log('tenantSchema', data);
     return this.createStaffUseCaseProxy
       .getInstance()
-      .execute(tenantSchema, data);
+      .execute({ schema: tenantSchema, data });
   }
 
   @Put(':id')
@@ -79,13 +81,15 @@ export class StaffController {
     const tenantSchema = (req as any).tenantSchema;
     return this.updateStaffUseCaseProxy
       .getInstance()
-      .execute(tenantSchema, { id, ...data });
+      .execute({ schema: tenantSchema, data: { id, ...data } });
   }
 
   @Delete(':id')
   async remove(@Req() req: Request, @Param('id') id: string) {
     const tenantSchema = (req as any).tenantSchema;
-    await this.removeStaffUseCaseProxy.getInstance().execute(tenantSchema, id);
+    await this.removeStaffUseCaseProxy
+      .getInstance()
+      .execute({ schema: tenantSchema, id });
     return { success: true };
   }
 }

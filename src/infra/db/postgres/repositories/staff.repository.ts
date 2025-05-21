@@ -8,6 +8,15 @@ import * as bcrypt from 'bcrypt';
 export class StaffRepositoryPostgres implements StaffRepository {
   constructor(private readonly postgres: PostgresService) {}
 
+  async findByEmail(schema: string, email: string): Promise<Staff | null> {
+    const result = await this.postgres.query<StaffProps>(
+      `SELECT * FROM "${schema}"."Staff" WHERE email = $1`,
+      [email],
+    );
+    if (!result.rows[0]) return null;
+    return Staff.fromPersistence(result.rows[0]);
+  }
+
   async findById(schema: string, id: string): Promise<Staff | null> {
     const result = await this.postgres.query<StaffProps>(
       `SELECT * FROM "${schema}"."Staff" WHERE id = $1`,
@@ -52,10 +61,16 @@ export class StaffRepositoryPostgres implements StaffRepository {
       [props.name, props.role, props.email, props.password, props.id],
     );
   }
-
   async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
     return hashedPassword;
+  }
+
+  async verifyPassword(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    return bcrypt.compare(password, hashedPassword);
   }
 }

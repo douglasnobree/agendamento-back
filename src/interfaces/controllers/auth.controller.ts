@@ -1,16 +1,18 @@
-import { Controller, Post, Body, BadRequestException, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  BadRequestException,
+  Req,
+} from '@nestjs/common';
 import { AuthService } from '../../infra/auth/auth.service';
-import { TenantService } from '../../infra/prisma/tenant.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { LoginDto, LoginResponseDto } from '../dtos/auth.dto';
 
 @ApiTags('autenticação')
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly tenantService: TenantService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
   @Post('login')
   @ApiOperation({ summary: 'Autenticar usuário e obter token JWT' })
   @ApiBody({

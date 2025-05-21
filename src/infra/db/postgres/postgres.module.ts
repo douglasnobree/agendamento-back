@@ -1,6 +1,5 @@
 import { Module, Global } from '@nestjs/common';
 import { PostgresService } from './postgres.service';
-import { TenantService } from '../../prisma/tenant.service';
 import { ConfigModule } from '@nestjs/config';
 import { TenantRepositoryPostgres } from './repositories/tenant.repository';
 import { ServiceRepositoryPostgres } from './repositories/service.repository';
@@ -13,7 +12,6 @@ import { AppointmentRepositoryPostgres } from './repositories/appointment.reposi
   imports: [ConfigModule],
   providers: [
     PostgresService,
-    TenantService,
     TenantRepositoryPostgres,
     ServiceRepositoryPostgres,
     ClientRepositoryPostgres,
@@ -42,7 +40,6 @@ import { AppointmentRepositoryPostgres } from './repositories/appointment.reposi
   ],
   exports: [
     PostgresService,
-    TenantService,
     TenantRepositoryPostgres,
     ServiceRepositoryPostgres,
     ClientRepositoryPostgres,

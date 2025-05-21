@@ -14,7 +14,7 @@ import {
 import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
 import { RolesGuard } from '../../infra/auth/roles.guard';
 import { Roles } from '../../infra/decorators/roles.decorator';
-import { UsecaseProxyModule } from '../../application/usecases/usecase-proxy.module';
+import { AppointmentUsecaseProxyModule } from '../../application/usecases/Appointments/appointment-usecase-proxy.module';
 import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
 import { ListAppointmentsUseCase } from '../../application/usecases/Appointments/appointment-useCase-list';
 import { GetAppointmentByIdUseCase } from '../../application/usecases/Appointments/appointment-useCase-getById';
@@ -39,17 +39,17 @@ import { GetAppointmentByClientIdUseCase } from 'src/application/usecases/Appoin
 })
 export class AppointmentController {
   constructor(
-    @Inject(UsecaseProxyModule.LIST_APPOINTMENTS_USE_CASE)
+    @Inject(AppointmentUsecaseProxyModule.LIST_APPOINTMENTS_USE_CASE)
     private readonly listAppointmentsUseCaseProxy: UseCaseProxy<ListAppointmentsUseCase>,
-    @Inject(UsecaseProxyModule.GET_APPOINTMENT_BY_ID_USE_CASE)
+    @Inject(AppointmentUsecaseProxyModule.GET_APPOINTMENT_BY_ID_USE_CASE)
     private readonly getAppointmentByIdUseCaseProxy: UseCaseProxy<GetAppointmentByIdUseCase>,
-    @Inject(UsecaseProxyModule.CREATE_APPOINTMENT_USE_CASE)
+    @Inject(AppointmentUsecaseProxyModule.CREATE_APPOINTMENT_USE_CASE)
     private readonly createAppointmentUseCaseProxy: UseCaseProxy<CreateAppointmentUseCase>,
-    @Inject(UsecaseProxyModule.UPDATE_APPOINTMENT_USE_CASE)
+    @Inject(AppointmentUsecaseProxyModule.UPDATE_APPOINTMENT_USE_CASE)
     private readonly updateAppointmentUseCaseProxy: UseCaseProxy<UpdateAppointmentUseCase>,
-    @Inject(UsecaseProxyModule.REMOVE_APPOINTMENT_USE_CASE)
+    @Inject(AppointmentUsecaseProxyModule.REMOVE_APPOINTMENT_USE_CASE)
     private readonly removeAppointmentUseCaseProxy: UseCaseProxy<RemoveAppointmentUseCase>,
-    @Inject(UsecaseProxyModule.GET_APPOINTMENT_BY_CLIENTID_USE_CASE)
+    @Inject(AppointmentUsecaseProxyModule.GET_APPOINTMENT_BY_CLIENTID_USE_CASE)
     private readonly getAppointmentByClientIdUseCaseProxy: UseCaseProxy<GetAppointmentByClientIdUseCase>,
   ) {}
 
@@ -80,7 +80,7 @@ export class AppointmentController {
   @Roles('owner', 'admin', 'client')
   async findOne(@Req() req: Request, @Param('appointmentId') id: string) {
     const tenantSchema = (req as any).tenantSchema;
-    return this.getAppointmentByIdUseCaseProxy 
+    return this.getAppointmentByIdUseCaseProxy
       .getInstance()
       .execute(tenantSchema, id);
   }

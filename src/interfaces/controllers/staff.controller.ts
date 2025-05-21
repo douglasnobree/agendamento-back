@@ -13,7 +13,7 @@ import {
 import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
 import { RolesGuard } from '../../infra/auth/roles.guard';
 import { Roles } from '../../infra/decorators/roles.decorator';
-import { UsecaseProxyModule } from '../../application/usecases/usecase-proxy.module';
+import { StaffUsecaseProxyModule } from '../../application/usecases/Staff/staff-usecase-proxy.module';
 import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
 import { ListStaffUseCase } from '../../application/usecases/Staff/staff-useCase-list';
 import { GetStaffByIdUseCase } from '../../application/usecases/Staff/staff-useCase-getById';
@@ -35,15 +35,15 @@ import { ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 })
 export class StaffController {
   constructor(
-    @Inject(UsecaseProxyModule.LIST_STAFF_USE_CASE)
+    @Inject(StaffUsecaseProxyModule.LIST_STAFF_USE_CASE)
     private readonly listStaffUseCaseProxy: UseCaseProxy<ListStaffUseCase>,
-    @Inject(UsecaseProxyModule.GET_STAFF_BY_ID_USE_CASE)
+    @Inject(StaffUsecaseProxyModule.GET_STAFF_BY_ID_USE_CASE)
     private readonly getStaffByIdUseCaseProxy: UseCaseProxy<GetStaffByIdUseCase>,
-    @Inject(UsecaseProxyModule.CREATE_STAFF_USE_CASE)
+    @Inject(StaffUsecaseProxyModule.CREATE_STAFF_USE_CASE)
     private readonly createStaffUseCaseProxy: UseCaseProxy<CreateStaffUseCase>,
-    @Inject(UsecaseProxyModule.UPDATE_STAFF_USE_CASE)
+    @Inject(StaffUsecaseProxyModule.UPDATE_STAFF_USE_CASE)
     private readonly updateStaffUseCaseProxy: UseCaseProxy<UpdateStaffUseCase>,
-    @Inject(UsecaseProxyModule.REMOVE_STAFF_USE_CASE)
+    @Inject(StaffUsecaseProxyModule.REMOVE_STAFF_USE_CASE)
     private readonly removeStaffUseCaseProxy: UseCaseProxy<RemoveStaffUseCase>,
   ) {}
 

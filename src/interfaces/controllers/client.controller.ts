@@ -13,7 +13,7 @@ import {
 import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
 import { RolesGuard } from '../../infra/auth/roles.guard';
 import { Roles } from '../../infra/decorators/roles.decorator';
-import { UsecaseProxyModule } from '../../application/usecases/usecase-proxy.module';
+import { ClientUsecaseProxyModule } from '../../application/usecases/Clients/client-usecase-proxy.module';
 import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
 import { ListClientsUseCase } from '../../application/usecases/Clients/client-useCase-list';
 import { GetClientByIdUseCase } from '../../application/usecases/Clients/client-useCase-getById';
@@ -43,15 +43,15 @@ import {
 })
 export class ClientController {
   constructor(
-    @Inject(UsecaseProxyModule.LIST_CLIENTS_USE_CASE)
+    @Inject(ClientUsecaseProxyModule.LIST_CLIENTS_USE_CASE)
     private readonly listClientsUseCaseProxy: UseCaseProxy<ListClientsUseCase>,
-    @Inject(UsecaseProxyModule.GET_CLIENT_BY_ID_USE_CASE)
+    @Inject(ClientUsecaseProxyModule.GET_CLIENT_BY_ID_USE_CASE)
     private readonly getClientByIdUseCaseProxy: UseCaseProxy<GetClientByIdUseCase>,
-    @Inject(UsecaseProxyModule.CREATE_CLIENT_USE_CASE)
+    @Inject(ClientUsecaseProxyModule.CREATE_CLIENT_USE_CASE)
     private readonly createClientUseCaseProxy: UseCaseProxy<CreateClientUseCase>,
-    @Inject(UsecaseProxyModule.UPDATE_CLIENT_USE_CASE)
+    @Inject(ClientUsecaseProxyModule.UPDATE_CLIENT_USE_CASE)
     private readonly updateClientUseCaseProxy: UseCaseProxy<UpdateClientUseCase>,
-    @Inject(UsecaseProxyModule.REMOVE_CLIENT_USE_CASE)
+    @Inject(ClientUsecaseProxyModule.REMOVE_CLIENT_USE_CASE)
     private readonly removeClientUseCaseProxy: UseCaseProxy<RemoveClientUseCase>,
   ) {}
 

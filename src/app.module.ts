@@ -16,7 +16,11 @@ import { PlanController } from './interfaces/controllers/plan.controller';
 import { AuthController } from './interfaces/controllers/auth.controller';
 import { AuthModule } from './infra/auth/auth.module';
 import { ModuleRef } from '@nestjs/core';
-import { UsecaseProxyModule } from './application/usecases/usecase-proxy.module';
+import { TenantUsecaseProxyModule } from './application/usecases/Tenants/tenant-usecase-proxy.module';
+import { ServiceUsecaseProxyModule } from './application/usecases/Services/service-usecase-proxy.module';
+import { ClientUsecaseProxyModule } from './application/usecases/Clients/client-usecase-proxy.module';
+import { StaffUsecaseProxyModule } from './application/usecases/Staff/staff-usecase-proxy.module';
+import { AppointmentUsecaseProxyModule } from './application/usecases/Appointments/appointment-usecase-proxy.module';
 
 @Module({
   imports: [
@@ -25,7 +29,11 @@ import { UsecaseProxyModule } from './application/usecases/usecase-proxy.module'
     }),
     PostgresModule,
     AuthModule,
-    UsecaseProxyModule.register()
+    TenantUsecaseProxyModule.register(),
+    ServiceUsecaseProxyModule.register(),
+    ClientUsecaseProxyModule.register(),
+    StaffUsecaseProxyModule.register(),
+    AppointmentUsecaseProxyModule.register(),
   ],
   controllers: [
     TenantController,

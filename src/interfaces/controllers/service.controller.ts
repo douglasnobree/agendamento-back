@@ -23,7 +23,7 @@ import {
   ApiBearerAuth,
   ApiHeader,
 } from '@nestjs/swagger';
-import { UsecaseProxyModule } from '../../application/usecases/usecase-proxy.module';
+import { ServiceUsecaseProxyModule } from '../../application/usecases/Services/service-usecase-proxy.module';
 import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
 import { ListServicesUseCase } from '../../application/usecases/Services/service-useCase-list';
 import { GetServiceByIdUseCase } from '../../application/usecases/Services/service-useCase-getById';
@@ -44,15 +44,15 @@ import { CreateServiceDto, UpdateServiceDto } from '../dtos/service.dto';
 })
 export class ServiceController {
   constructor(
-    @Inject(UsecaseProxyModule.LIST_SERVICES_USE_CASE)
+    @Inject(ServiceUsecaseProxyModule.LIST_SERVICES_USE_CASE)
     private readonly listServicesUseCaseProxy: UseCaseProxy<ListServicesUseCase>,
-    @Inject(UsecaseProxyModule.GET_SERVICE_BY_ID_USE_CASE)
+    @Inject(ServiceUsecaseProxyModule.GET_SERVICE_BY_ID_USE_CASE)
     private readonly getServiceByIdUseCaseProxy: UseCaseProxy<GetServiceByIdUseCase>,
-    @Inject(UsecaseProxyModule.CREATE_SERVICE_USE_CASE)
+    @Inject(ServiceUsecaseProxyModule.CREATE_SERVICE_USE_CASE)
     private readonly createServiceUseCaseProxy: UseCaseProxy<CreateServiceUseCase>,
-    @Inject(UsecaseProxyModule.UPDATE_SERVICE_USE_CASE)
+    @Inject(ServiceUsecaseProxyModule.UPDATE_SERVICE_USE_CASE)
     private readonly updateServiceUseCaseProxy: UseCaseProxy<UpdateServiceUseCase>,
-    @Inject(UsecaseProxyModule.REMOVE_SERVICE_USE_CASE)
+    @Inject(ServiceUsecaseProxyModule.REMOVE_SERVICE_USE_CASE)
     private readonly removeServiceUseCaseProxy: UseCaseProxy<RemoveServiceUseCase>,
   ) {}
 

@@ -22,7 +22,7 @@ import {
   ApiHeader,
 } from '@nestjs/swagger';
 import { CreateTenantDto, TenantResponseDto } from '../dtos/tenant.dto';
-import { UsecaseProxyModule } from '../../application/usecases/usecase-proxy.module';
+import { TenantUsecaseProxyModule } from '../../application/usecases/Tenants/tenant-usecase-proxy.module';
 import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
 import { ListTenantsUseCase } from '../../application/usecases/Tenants/tenant-useCase-list';
 import { CreateTenantUseCase } from '../../application/usecases/Tenants/tenant-useCase-create';
@@ -41,11 +41,11 @@ import { GetTenantByIdUseCase } from '../../application/usecases/Tenants/tenant-
 })
 export class TenantController {
   constructor(
-    @Inject(UsecaseProxyModule.LIST_TENANTS_USE_CASE)
+    @Inject(TenantUsecaseProxyModule.LIST_TENANTS_USE_CASE)
     private readonly listTenantsUseCaseProxy: UseCaseProxy<ListTenantsUseCase>,
-    @Inject(UsecaseProxyModule.CREATE_TENANT_USE_CASE)
+    @Inject(TenantUsecaseProxyModule.CREATE_TENANT_USE_CASE)
     private readonly createTenantUseCaseProxy: UseCaseProxy<CreateTenantUseCase>,
-    @Inject(UsecaseProxyModule.GET_TENANT_BY_ID_USE_CASE)
+    @Inject(TenantUsecaseProxyModule.GET_TENANT_BY_ID_USE_CASE)
     private readonly getTenantByIdUseCaseProxy: UseCaseProxy<GetTenantByIdUseCase>,
   ) {}
   @Post()

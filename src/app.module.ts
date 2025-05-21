@@ -21,6 +21,7 @@ import { ServiceUsecaseProxyModule } from './application/usecases/Services/servi
 import { ClientUsecaseProxyModule } from './application/usecases/Clients/client-usecase-proxy.module';
 import { StaffUsecaseProxyModule } from './application/usecases/Staff/staff-usecase-proxy.module';
 import { AppointmentUsecaseProxyModule } from './application/usecases/Appointments/appointment-usecase-proxy.module';
+import { PlanUsecaseProxyModule } from './application/usecases/Plans/plan-usecase-proxy.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { AppointmentUsecaseProxyModule } from './application/usecases/Appointmen
     ClientUsecaseProxyModule.register(),
     StaffUsecaseProxyModule.register(),
     AppointmentUsecaseProxyModule.register(),
+    PlanUsecaseProxyModule.register(),
   ],
   controllers: [
     TenantController,

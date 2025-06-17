@@ -6,6 +6,7 @@ import { GetTenantBySchemaUseCase } from './tenant-useCase-getBySchema';
 import { CreateTenantUseCase } from './tenant-useCase-create';
 import { UseCaseProxy } from '../usecase-proxy';
 import { PostgresModule } from '../../../infra/db/postgres/postgres.module';
+import { TenantRepositoryPrisma } from 'src/infra/db/prisma/repositories/tenant.repository';
 
 @Module({
   imports: [PostgresModule],
@@ -27,9 +28,9 @@ export class TenantUsecaseProxyModule {
             new UseCaseProxy(new ListTenantsUseCase(repo)),
         },
         {
-          inject: [TenantRepositoryPostgres],
+          inject: [TenantRepositoryPrisma],
           provide: TenantUsecaseProxyModule.CREATE_TENANT_USE_CASE,
-          useFactory: (repo: TenantRepositoryPostgres) =>
+          useFactory: (repo: TenantRepositoryPrisma) =>
             new UseCaseProxy(new CreateTenantUseCase(repo)),
         },
         {

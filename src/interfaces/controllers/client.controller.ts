@@ -9,6 +9,7 @@ import {
   UseGuards,
   Inject,
   Req,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
 import { RolesGuard } from '../../infra/auth/roles.guard';
@@ -29,8 +30,14 @@ import {
   ApiProperty,
   ApiBearerAuth,
   ApiHeader,
+  ApiExtraModels,
+  getSchemaPath,
 } from '@nestjs/swagger';
+import { Client } from '../../domain/entities/client.entity';
+import { PaginatedResult } from '../../application/dtos/pagination.dto';
+import { Pagination } from '../../infra/decorators/pagination.decorator';
 
+@ApiExtraModels(CreateClientDto, UpdateClientDto)
 @Controller('api/tenant/clients')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Clientes')
@@ -57,26 +64,68 @@ export class ClientController {
 
   @Get()
   @Roles('owner', 'admin')
-  @ApiOperation({ summary: 'Listar todos os clientes' })
+  @ApiOperation({ summary: 'Listar todos os clientes (paginado)' })
   @ApiResponse({
     status: 200,
-    description: 'Lista de clientes retornada com sucesso',
+    description: 'Lista paginada de clientes',
+    schema: {
+      properties: {
+        items: {
+          type: 'array',
+          items: { $ref: getSchemaPath(CreateClientDto) },
+        },
+        meta: {
+          type: 'object',
+          properties: {
+            totalItems: { type: 'number', example: 100 },
+            itemCount: { type: 'number', example: 10 },
+            itemsPerPage: { type: 'number', example: 10 },
+            totalPages: { type: 'number', example: 10 },
+            currentPage: { type: 'number', example: 1 },
+          },
+        },
+      },
+      example: {
+        items: [
+          { id: 'uuid', name: 'João Silva', email: 'joao@example.com', phone: '11987654321', createdAt: '2025-06-17T19:00:00Z' },
+        ],
+        meta: {
+          totalItems: 1,
+          itemCount: 1,
+          itemsPerPage: 10,
+          totalPages: 1,
+          currentPage: 1,
+        },
+      },
+    },
   })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   @ApiResponse({ status: 403, description: 'Acesso proibido' })
-  async findAll(@Req() req: Request) {
+  async findAll(
+    @Req() req: Request,
+    @Pagination() pag: { page?: number; limit?: number },
+  ): Promise<PaginatedResult<Client>> {
     const tenantSchema = (req as any).tenantSchema;
-    console.log('tenantSchema reqall', tenantSchema);
     return this.listClientsUseCaseProxy
       .getInstance()
-      .execute({ schema: tenantSchema });
+      .execute({ schema: tenantSchema, page: pag.page, limit: pag.limit });
   }
 
   @Get(':id')
   @Roles('owner', 'admin', 'client')
   @ApiOperation({ summary: 'Obter um cliente pelo ID' })
   @ApiParam({ name: 'id', description: 'ID do cliente' })
-  @ApiResponse({ status: 200, description: 'Cliente encontrado com sucesso' })
+  @ApiResponse({
+    status: 200,
+    description: 'Cliente encontrado com sucesso',
+    schema: { $ref: getSchemaPath(CreateClientDto) },
+    examples: {
+      exemplo: {
+        summary: 'Exemplo de retorno',
+        value: { id: 'uuid', name: 'João Silva', email: 'joao@example.com', phone: '11987654321', createdAt: '2025-06-17T19:00:00Z' },
+      },
+    },
+  })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   @ApiResponse({ status: 403, description: 'Acesso proibido' })
   @ApiResponse({ status: 404, description: 'Cliente não encontrado' })
@@ -91,7 +140,17 @@ export class ClientController {
   @Post()
   @Roles('owner', 'admin')
   @ApiOperation({ summary: 'Criar um novo cliente' })
-  @ApiResponse({ status: 201, description: 'Cliente criado com sucesso' })
+  @ApiResponse({
+    status: 201,
+    description: 'Cliente criado com sucesso',
+    schema: { $ref: getSchemaPath(CreateClientDto) },
+    examples: {
+      exemplo: {
+        summary: 'Exemplo de retorno',
+        value: { id: 'uuid', name: 'João Silva', email: 'joao@example.com', phone: '11987654321', createdAt: '2025-06-17T19:00:00Z' },
+      },
+    },
+  })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   @ApiResponse({ status: 403, description: 'Acesso proibido' })
@@ -105,6 +164,23 @@ export class ClientController {
 
   @Put(':id')
   @Roles('owner', 'admin')
+  @ApiOperation({ summary: 'Atualizar um cliente' })
+  @ApiParam({ name: 'id', description: 'ID do cliente' })
+  @ApiResponse({
+    status: 200,
+    description: 'Cliente atualizado com sucesso',
+    schema: { $ref: getSchemaPath(CreateClientDto) },
+    examples: {
+      exemplo: {
+        summary: 'Exemplo de retorno',
+        value: { id: 'uuid', name: 'João Silva', email: 'joao@example.com', phone: '11987654321', createdAt: '2025-06-17T19:00:00Z' },
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Dados inválidos' })
+  @ApiResponse({ status: 401, description: 'Não autorizado' })
+  @ApiResponse({ status: 403, description: 'Acesso proibido' })
+  @ApiResponse({ status: 404, description: 'Cliente não encontrado' })
   async update(
     @Req() req: Request,
     @Param('id') id: string,
@@ -119,6 +195,18 @@ export class ClientController {
 
   @Delete(':id')
   @Roles('owner', 'admin')
+  @ApiOperation({ summary: 'Remover um cliente' })
+  @ApiParam({ name: 'id', description: 'ID do cliente' })
+  @ApiResponse({
+    status: 200,
+    description: 'Cliente removido com sucesso',
+    schema: {
+      example: { success: true },
+    },
+  })
+  @ApiResponse({ status: 401, description: 'Não autorizado' })
+  @ApiResponse({ status: 403, description: 'Acesso proibido' })
+  @ApiResponse({ status: 404, description: 'Cliente não encontrado' })
   async remove(@Req() req: Request, @Param('id') id: string) {
     const tenantSchema = (req as any).tenantSchema;
     await this.removeClientUseCaseProxy.getInstance().execute({

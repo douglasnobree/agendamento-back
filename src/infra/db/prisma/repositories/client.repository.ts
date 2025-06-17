@@ -2,6 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { Client } from '../../../../domain/entities/client.entity';
 import { ClientRepository } from '../../../../domain/repositoriesInterface/client.repository-interface';
+import {
+  PaginatedResult,
+  PaginationMeta,
+} from '../../../../application/dtos/pagination.dto';
+import { PrismaPagination } from '../prisma-pagination.util';
 
 @Injectable()
 export class ClientRepositoryPrisma implements ClientRepository {
@@ -25,10 +30,18 @@ export class ClientRepositoryPrisma implements ClientRepository {
     return Client.fromPersistence(data);
   }
 
-  async findAll(schema: string): Promise<Client[]> {
+  async findAll(
+    schema: string,
+    page = 1,
+    limit = 10,
+  ): Promise<PaginatedResult<Client>> {
     await this.setSchema(schema);
-    const data = await this.prisma.client.findMany();
-    return data.map(Client.fromPersistence);
+    return PrismaPagination.paginate<Client, typeof this.prisma.client>(
+      this.prisma.client,
+      {},
+      { page, limit },
+      Client.fromPersistence,
+    );
   }
 
   async save(schema: string, client: Client): Promise<void> {

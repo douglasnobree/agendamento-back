@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { apiReference } from '@scalar/nestjs-api-reference';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -31,6 +32,17 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
+
+  // Configuração do Scalar API Reference
+  app.use(
+    '/api/reference',
+    apiReference({
+      content: document,
+      theme: 'solarized', // ou 'purple', 'dark', etc.
+      layout: 'modern',
+      // Outras opções podem ser configuradas conforme necessário
+    }),
+  );
 
   // Iniciar a aplicação na porta definida
   await app.listen(process.env.PORT ?? 3000);

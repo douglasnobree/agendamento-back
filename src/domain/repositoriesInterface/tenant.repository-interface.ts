@@ -7,4 +7,9 @@ export interface TenantRepository {
   save(tenant: Tenant): Promise<void>;
   remove(id: string): Promise<void>;
   update(tenant: Tenant): Promise<void>;
+  createTenantWithSchema(input: {
+    name: string;
+    ownerEmail: string;
+    planId: string;
+  }): Promise<Tenant>;
 }

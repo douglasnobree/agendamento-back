@@ -7,6 +7,7 @@ import { UpdateServiceUseCase } from './service-useCase-update';
 import { RemoveServiceUseCase } from './service-useCase-remove';
 import { UseCaseProxy } from '../usecase-proxy';
 import { PostgresModule } from '../../../infra/db/postgres/postgres.module';
+import { ServiceRepositoryPrisma } from 'src/infra/db/prisma/repositories/service.repository';
 
 @Module({
   imports: [PostgresModule],
@@ -23,33 +24,33 @@ export class ServiceUsecaseProxyModule {
       module: ServiceUsecaseProxyModule,
       providers: [
         {
-          inject: [ServiceRepositoryPostgres],
+          inject: [ServiceRepositoryPrisma],
           provide: ServiceUsecaseProxyModule.LIST_SERVICES_USE_CASE,
-          useFactory: (repo: ServiceRepositoryPostgres) =>
+          useFactory: (repo: ServiceRepositoryPrisma) =>
             new UseCaseProxy(new ListServicesUseCase(repo)),
         },
         {
-          inject: [ServiceRepositoryPostgres],
+          inject: [ServiceRepositoryPrisma],
           provide: ServiceUsecaseProxyModule.GET_SERVICE_BY_ID_USE_CASE,
-          useFactory: (repo: ServiceRepositoryPostgres) =>
+          useFactory: (repo: ServiceRepositoryPrisma) =>
             new UseCaseProxy(new GetServiceByIdUseCase(repo)),
         },
         {
-          inject: [ServiceRepositoryPostgres],
+          inject: [ServiceRepositoryPrisma],
           provide: ServiceUsecaseProxyModule.CREATE_SERVICE_USE_CASE,
-          useFactory: (repo: ServiceRepositoryPostgres) =>
+          useFactory: (repo: ServiceRepositoryPrisma) =>
             new UseCaseProxy(new CreateServiceUseCase(repo)),
         },
         {
-          inject: [ServiceRepositoryPostgres],
+          inject: [ServiceRepositoryPrisma],
           provide: ServiceUsecaseProxyModule.UPDATE_SERVICE_USE_CASE,
-          useFactory: (repo: ServiceRepositoryPostgres) =>
+          useFactory: (repo: ServiceRepositoryPrisma) =>
             new UseCaseProxy(new UpdateServiceUseCase(repo)),
         },
         {
-          inject: [ServiceRepositoryPostgres],
+          inject: [ServiceRepositoryPrisma],
           provide: ServiceUsecaseProxyModule.REMOVE_SERVICE_USE_CASE,
-          useFactory: (repo: ServiceRepositoryPostgres) =>
+          useFactory: (repo: ServiceRepositoryPrisma) =>
             new UseCaseProxy(new RemoveServiceUseCase(repo)),
         },
       ],

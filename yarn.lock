@@ -1174,6 +1174,29 @@
   dependencies:
     "@prisma/debug" "6.8.2"
 
+"@scalar/nestjs-api-reference@^0.5.3":
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/@scalar/nestjs-api-reference/-/nestjs-api-reference-0.5.3.tgz#5223be03fdbb00874c953fee584f2ffbcf92e113"
+  integrity sha512-Zv2pVj65ufi7p2eXua6qi5PUTU1FcGo8qQKBdHh2rjPfsGQ/WMGV1UkY2C+pwXPlieqBC4dg7fTeMXWpCqcZzQ==
+  dependencies:
+    "@scalar/types" "0.2.3"
+
+"@scalar/openapi-types@0.3.3":
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/@scalar/openapi-types/-/openapi-types-0.3.3.tgz#52b9ed170e5e0ac59f128d65bf41347d2ad0220c"
+  integrity sha512-mr3OvbCyvuzSDgv9gR9D3pJAsl82BRNBp1P8ldgRgKF4Wiswfa7nQeKibpX0kHSGXLgiyvxWJULUFwgdWMXNNA==
+  dependencies:
+    zod "3.24.1"
+
+"@scalar/types@0.2.3":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@scalar/types/-/types-0.2.3.tgz#79be31eb556cb55210cd22988f22ae0ea49abd1e"
+  integrity sha512-K1/Vp5xaQ8TEGDYwHg88OBuQWJRWrE3ToZ0Z2LJwskcY1Eg+uDiRQXKF4QPngZzu5rrWgRErAq4yte4Y7omqgA==
+  dependencies:
+    "@scalar/openapi-types" "0.3.3"
+    nanoid "^5.1.5"
+    zod "3.24.1"
+
 "@scarf/scarf@=1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@scarf/scarf/-/scarf-1.4.0.tgz#3bbb984085dbd6d982494538b523be1ce6562972"
@@ -4568,6 +4591,11 @@ mute-stream@^2.0.0:
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-2.0.0.tgz#a5446fc0c512b71c83c44d908d5c7b7b4c493b2b"
   integrity sha512-WWdIxpyjEn+FhQJQQv9aQAYlHoNVdzIzUySNV1gHUPDSdZJ3yZn7pAAbQcV7B56Mvu881q9FZV+0Vx2xC44VWA==
 
+nanoid@^5.1.5:
+  version "5.1.5"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-5.1.5.tgz#f7597f9d9054eb4da9548cdd53ca70f1790e87de"
+  integrity sha512-Ir/+ZpE9fDsNH0hQ3C68uyThDXzYcim2EqcZ8zn8Chtt1iylPT9xXJB0kPCnqzgcEGikO9RxSrh63MsmVCU7Fw==
+
 natural-compare@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
@@ -6114,3 +6142,8 @@ yoctocolors-cjs@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/yoctocolors-cjs/-/yoctocolors-cjs-2.1.2.tgz#f4b905a840a37506813a7acaa28febe97767a242"
   integrity sha512-cYVsTjKl8b+FrnidjibDWskAv7UKOfcwaVZdp/it9n1s9fU3IkgDbhdIRKCW4JDsAlECJY0ytoVPT3sK6kideA==
+
+zod@3.24.1:
+  version "3.24.1"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.24.1.tgz#27445c912738c8ad1e9de1bea0359fa44d9d35ee"
+  integrity sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==

@@ -66,7 +66,7 @@ export class ClientController {
   @ApiResponse({ status: 403, description: 'Acesso proibido' })
   async findAll(@Req() req: Request) {
     const tenantSchema = (req as any).tenantSchema;
-    console.log('tenantSchema', tenantSchema);
+    console.log('tenantSchema reqall', tenantSchema);
     return this.listClientsUseCaseProxy
       .getInstance()
       .execute({ schema: tenantSchema });

@@ -6,7 +6,6 @@ import { GetTenantBySchemaUseCase } from './tenant-useCase-getBySchema';
 import { CreateTenantUseCase } from './tenant-useCase-create';
 import { UseCaseProxy } from '../usecase-proxy';
 import { PostgresModule } from '../../../infra/db/postgres/postgres.module';
-import { PostgresService } from '../../../infra/db/postgres/postgres.service';
 
 @Module({
   imports: [PostgresModule],
@@ -28,12 +27,10 @@ export class TenantUsecaseProxyModule {
             new UseCaseProxy(new ListTenantsUseCase(repo)),
         },
         {
-          inject: [TenantRepositoryPostgres, PostgresService],
+          inject: [TenantRepositoryPostgres],
           provide: TenantUsecaseProxyModule.CREATE_TENANT_USE_CASE,
-          useFactory: (
-            repo: TenantRepositoryPostgres,
-            postgres: PostgresService,
-          ) => new UseCaseProxy(new CreateTenantUseCase(repo, postgres)),
+          useFactory: (repo: TenantRepositoryPostgres) =>
+            new UseCaseProxy(new CreateTenantUseCase(repo)),
         },
         {
           inject: [TenantRepositoryPostgres],

@@ -35,7 +35,10 @@ import {
 } from '@nestjs/swagger';
 import { Client } from '../../domain/entities/client.entity';
 import { PaginatedResult } from '../../application/dtos/pagination.dto';
-import { Pagination } from '../../infra/decorators/pagination.decorator';
+import {
+  Pagination,
+  ApiPaginationQuery,
+} from '../../infra/decorators/pagination.decorator';
 
 @ApiExtraModels(CreateClientDto, UpdateClientDto)
 @Controller('api/tenant/clients')
@@ -61,10 +64,10 @@ export class ClientController {
     @Inject(ClientUsecaseProxyModule.REMOVE_CLIENT_USE_CASE)
     private readonly removeClientUseCaseProxy: UseCaseProxy<RemoveClientUseCase>,
   ) {}
-
   @Get()
   @Roles('owner', 'admin')
   @ApiOperation({ summary: 'Listar todos os clientes (paginado)' })
+  @ApiPaginationQuery()
   @ApiResponse({
     status: 200,
     description: 'Lista paginada de clientes',
@@ -87,7 +90,13 @@ export class ClientController {
       },
       example: {
         items: [
-          { id: 'uuid', name: 'João Silva', email: 'joao@example.com', phone: '11987654321', createdAt: '2025-06-17T19:00:00Z' },
+          {
+            id: 'uuid',
+            name: 'João Silva',
+            email: 'joao@example.com',
+            phone: '11987654321',
+            createdAt: '2025-06-17T19:00:00Z',
+          },
         ],
         meta: {
           totalItems: 1,
@@ -122,7 +131,13 @@ export class ClientController {
     examples: {
       exemplo: {
         summary: 'Exemplo de retorno',
-        value: { id: 'uuid', name: 'João Silva', email: 'joao@example.com', phone: '11987654321', createdAt: '2025-06-17T19:00:00Z' },
+        value: {
+          id: 'uuid',
+          name: 'João Silva',
+          email: 'joao@example.com',
+          phone: '11987654321',
+          createdAt: '2025-06-17T19:00:00Z',
+        },
       },
     },
   })
@@ -147,7 +162,13 @@ export class ClientController {
     examples: {
       exemplo: {
         summary: 'Exemplo de retorno',
-        value: { id: 'uuid', name: 'João Silva', email: 'joao@example.com', phone: '11987654321', createdAt: '2025-06-17T19:00:00Z' },
+        value: {
+          id: 'uuid',
+          name: 'João Silva',
+          email: 'joao@example.com',
+          phone: '11987654321',
+          createdAt: '2025-06-17T19:00:00Z',
+        },
       },
     },
   })
@@ -173,7 +194,13 @@ export class ClientController {
     examples: {
       exemplo: {
         summary: 'Exemplo de retorno',
-        value: { id: 'uuid', name: 'João Silva', email: 'joao@example.com', phone: '11987654321', createdAt: '2025-06-17T19:00:00Z' },
+        value: {
+          id: 'uuid',
+          name: 'João Silva',
+          email: 'joao@example.com',
+          phone: '11987654321',
+          createdAt: '2025-06-17T19:00:00Z',
+        },
       },
     },
   })

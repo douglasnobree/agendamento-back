@@ -11,7 +11,8 @@ import { TenantRepositoryPrisma } from './repositories/tenant.repository';
 import { AvailableSlotRepositoryPrisma } from './repositories/available-slot.repository';
 
 @Global()
-@Module({  providers: [
+@Module({
+  providers: [
     PrismaService,
     ClientRepositoryPrisma,
     AppointmentRepositoryPrisma,

@@ -19,12 +19,15 @@ export class AvailableSlotUsecaseProxyModule {
 
   static register(): DynamicModule {
     return {
-      module: AvailableSlotUsecaseProxyModule,      providers: [
+      module: AvailableSlotUsecaseProxyModule,
+      providers: [
         {
           inject: [AvailableSlotRepositoryPrisma],
           provide:
             AvailableSlotUsecaseProxyModule.CREATE_AVAILABLE_SLOT_USE_CASE,
-          useFactory: (availableSlotRepository: AvailableSlotRepositoryPrisma) =>
+          useFactory: (
+            availableSlotRepository: AvailableSlotRepositoryPrisma,
+          ) =>
             new UseCaseProxy(
               new CreateAvailableSlotUseCase(availableSlotRepository),
             ),
@@ -33,7 +36,9 @@ export class AvailableSlotUsecaseProxyModule {
           inject: [AvailableSlotRepositoryPrisma],
           provide:
             AvailableSlotUsecaseProxyModule.GET_AVAILABLE_SLOTS_BY_STAFF_ID_USE_CASE,
-          useFactory: (availableSlotRepository: AvailableSlotRepositoryPrisma) =>
+          useFactory: (
+            availableSlotRepository: AvailableSlotRepositoryPrisma,
+          ) =>
             new UseCaseProxy(
               new GetAvailableSlotByStaffIdUseCase(availableSlotRepository),
             ),
@@ -43,8 +48,8 @@ export class AvailableSlotUsecaseProxyModule {
           provide:
             AvailableSlotUsecaseProxyModule.GET_AVAILABLE_TIMESLOTS_USE_CASE,
           useFactory: (
-            availableSlotRepository: AvailableSlotRepositoryPrisma, 
-            serviceRepository: ServiceRepositoryPrisma
+            availableSlotRepository: AvailableSlotRepositoryPrisma,
+            serviceRepository: ServiceRepositoryPrisma,
           ) =>
             new UseCaseProxy(
               new GetAvailableTimeslotsUseCase(

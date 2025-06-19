@@ -23,7 +23,8 @@ export class AppointmentUsecaseProxyModule {
   static UPDATE_APPOINTMENT_USE_CASE = 'updateAppointmentUsecaseProxy';
   static REMOVE_APPOINTMENT_USE_CASE = 'removeAppointmentUsecaseProxy';
   static GET_APPOINTMENT_BY_CLIENTID_USE_CASE =
-    'getAppointmentByClientIdUsecaseProxy';  static register(): DynamicModule {
+    'getAppointmentByClientIdUsecaseProxy';
+  static register(): DynamicModule {
     return {
       module: AppointmentUsecaseProxyModule,
       providers: [

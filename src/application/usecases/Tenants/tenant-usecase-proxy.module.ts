@@ -20,7 +20,8 @@ export class TenantUsecaseProxyModule {
 
   static register(): DynamicModule {
     return {
-      module: TenantUsecaseProxyModule,      providers: [
+      module: TenantUsecaseProxyModule,
+      providers: [
         {
           inject: [TenantRepositoryPrisma],
           provide: TenantUsecaseProxyModule.LIST_TENANTS_USE_CASE,

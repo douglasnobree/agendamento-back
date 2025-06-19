@@ -6,10 +6,11 @@ import { GetTenantBySchemaUseCase } from './tenant-useCase-getBySchema';
 import { CreateTenantUseCase } from './tenant-useCase-create';
 import { UseCaseProxy } from '../usecase-proxy';
 import { PostgresModule } from '../../../infra/db/postgres/postgres.module';
-import { TenantRepositoryPrisma } from 'src/infra/db/prisma/repositories/tenant.repository';
+import { PrismaModule } from '../../../infra/db/prisma/prisma.module';
+import { TenantRepositoryPrisma } from '../../../infra/db/prisma/repositories/tenant.repository';
 
 @Module({
-  imports: [PostgresModule],
+  imports: [PostgresModule, PrismaModule],
 })
 export class TenantUsecaseProxyModule {
   static LIST_TENANTS_USE_CASE = 'listTenantsUsecaseProxy';
@@ -19,30 +20,30 @@ export class TenantUsecaseProxyModule {
 
   static register(): DynamicModule {
     return {
-      module: TenantUsecaseProxyModule,
-      providers: [
+      module: TenantUsecaseProxyModule,      providers: [
         {
-          inject: [TenantRepositoryPostgres],
+          inject: [TenantRepositoryPrisma],
           provide: TenantUsecaseProxyModule.LIST_TENANTS_USE_CASE,
-          useFactory: (repo: TenantRepositoryPostgres) =>
+          useFactory: (repo: TenantRepositoryPrisma) =>
             new UseCaseProxy(new ListTenantsUseCase(repo)),
         },
         {
           inject: [TenantRepositoryPrisma],
           provide: TenantUsecaseProxyModule.CREATE_TENANT_USE_CASE,
-          useFactory: (repo: TenantRepositoryPrisma) =>
-            new UseCaseProxy(new CreateTenantUseCase(repo)),
+          useFactory: (repo: TenantRepositoryPrisma) => {
+            return new UseCaseProxy(new CreateTenantUseCase(repo));
+          },
         },
         {
-          inject: [TenantRepositoryPostgres],
+          inject: [TenantRepositoryPrisma],
           provide: TenantUsecaseProxyModule.GET_TENANT_BY_ID_USE_CASE,
-          useFactory: (repo: TenantRepositoryPostgres) =>
+          useFactory: (repo: TenantRepositoryPrisma) =>
             new UseCaseProxy(new GetTenantByIdUseCase(repo)),
         },
         {
-          inject: [TenantRepositoryPostgres],
+          inject: [TenantRepositoryPrisma],
           provide: TenantUsecaseProxyModule.GET_TENANT_BY_SCHEMA_USE_CASE,
-          useFactory: (repo: TenantRepositoryPostgres) =>
+          useFactory: (repo: TenantRepositoryPrisma) =>
             new UseCaseProxy(new GetTenantBySchemaUseCase(repo)),
         },
       ],

@@ -80,13 +80,14 @@ model Service {
 }
 
 model Staff {
-  id           String        @id @default(uuid())
-  name         String
-  role         String
-  email        String        @unique
-  password     String?
-  appointments Appointment[]
-  createdAt    DateTime      @default(now())
+  id             String          @id @default(uuid())
+  name           String
+  role           String
+  email          String          @unique
+  password       String?
+  appointments   Appointment[]
+  availableSlots AvailableSlot[]
+  createdAt      DateTime        @default(now())
 
   @@schema("tenant")
 }
@@ -102,6 +103,20 @@ model Appointment {
   service     Service  @relation(fields: [serviceId], references: [id])
   staff       Staff    @relation(fields: [staffId], references: [id])
   createdAt   DateTime @default(now())
+
+  @@schema("tenant")
+}
+
+model AvailableSlot {
+  id           String    @id @default(uuid())
+  staffId      String
+  staff        Staff     @relation(fields: [staffId], references: [id])
+  dayOfWeek    Int // 0-6 (0 = domingo, 6 = sábado)
+  startTime    DateTime // Hora de início (somente a parte de tempo é relevante)
+  endTime      DateTime // Hora de fim (somente a parte de tempo é relevante)
+  isRecurring  Boolean   @default(true) // Se é recorrente toda semana
+  specificDate DateTime? // Data específica, usado quando isRecurring = false
+  createdAt    DateTime  @default(now())
 
   @@schema("tenant")
 }

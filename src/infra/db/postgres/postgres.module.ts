@@ -7,6 +7,7 @@ import { ClientRepositoryPostgres } from './repositories/client.repository';
 import { StaffRepositoryPostgres } from './repositories/staff.repository';
 import { AppointmentRepositoryPostgres } from './repositories/appointment.repository';
 import { PlanRepositoryPostgres } from './repositories/plan.repository';
+import { AvailableSlotRepositoryPostgres } from './repositories/available-slot.repository';
 
 @Global()
 @Module({
@@ -19,6 +20,7 @@ import { PlanRepositoryPostgres } from './repositories/plan.repository';
     StaffRepositoryPostgres,
     AppointmentRepositoryPostgres,
     PlanRepositoryPostgres,
+    AvailableSlotRepositoryPostgres,
     {
       provide: 'TenantRepository',
       useExisting: TenantRepositoryPostgres,
@@ -39,6 +41,10 @@ import { PlanRepositoryPostgres } from './repositories/plan.repository';
       provide: 'AppointmentRepository',
       useExisting: AppointmentRepositoryPostgres,
     },
+    {
+      provide: 'AvailableSlotRepository',
+      useExisting: AvailableSlotRepositoryPostgres,
+    },
   ],
   exports: [
     PostgresService,
@@ -48,6 +54,7 @@ import { PlanRepositoryPostgres } from './repositories/plan.repository';
     StaffRepositoryPostgres,
     AppointmentRepositoryPostgres,
     PlanRepositoryPostgres,
+    AvailableSlotRepositoryPostgres,
     'TenantRepository',
     'ServiceRepository',
     'ClientRepository',

@@ -128,9 +128,7 @@ export class TenantRepositoryPrisma implements TenantRepository {
         );
         await prisma.$executeRawUnsafe(
           `CREATE UNIQUE INDEX IF NOT EXISTS "Staff_email_key" ON "${schema}"."Staff"("email")`,
-        );
-
-        // Criar tabela Appointment
+        ); // Criar tabela Appointment
         await prisma.$executeRawUnsafe(
           `CREATE TABLE IF NOT EXISTS "${schema}"."Appointment" (
             "id" TEXT PRIMARY KEY,
@@ -139,6 +137,20 @@ export class TenantRepositoryPrisma implements TenantRepository {
             "staffId" TEXT NOT NULL,
             "scheduledAt" TIMESTAMP(3) NOT NULL,
             "status" TEXT NOT NULL,
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+          )`,
+        );
+
+        // Criar tabela AvailableSlot
+        await prisma.$executeRawUnsafe(
+          `CREATE TABLE IF NOT EXISTS "${schema}"."AvailableSlot" (
+            "id" TEXT PRIMARY KEY,
+            "staffId" TEXT NOT NULL,
+            "dayOfWeek" INTEGER NOT NULL,
+            "startTime" TIMESTAMP(3) NOT NULL,
+            "endTime" TIMESTAMP(3) NOT NULL,
+            "isRecurring" BOOLEAN NOT NULL DEFAULT TRUE,
+            "specificDate" TIMESTAMP(3),
             "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
           )`,
         );
@@ -159,10 +171,18 @@ export class TenantRepositoryPrisma implements TenantRepository {
         } catch (e) {
           if (!e.message.includes('already exists')) throw e;
         }
-
         try {
           await prisma.$executeRawUnsafe(
             `ALTER TABLE "${schema}"."Appointment" ADD CONSTRAINT "Appointment_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "${schema}"."Staff"("id") ON DELETE RESTRICT ON UPDATE CASCADE`,
+          );
+        } catch (e) {
+          if (!e.message.includes('already exists')) throw e;
+        }
+
+        // Adicionar Foreign Key para AvailableSlot
+        try {
+          await prisma.$executeRawUnsafe(
+            `ALTER TABLE "${schema}"."AvailableSlot" ADD CONSTRAINT "AvailableSlot_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "${schema}"."Staff"("id") ON DELETE CASCADE ON UPDATE CASCADE`,
           );
         } catch (e) {
           if (!e.message.includes('already exists')) throw e;

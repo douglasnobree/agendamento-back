@@ -8,9 +8,13 @@ import { RemoveAppointmentUseCase } from './appointment-useCase-remove';
 import { GetAppointmentByClientIdUseCase } from './appointment-useCase-getByClientId';
 import { UseCaseProxy } from '../usecase-proxy';
 import { PostgresModule } from '../../../infra/db/postgres/postgres.module';
+import { PrismaModule } from '../../../infra/db/prisma/prisma.module';
+import { AppointmentRepositoryPrisma } from '../../../infra/db/prisma/repositories/appointment.repository';
+import { AvailableSlotRepositoryPrisma } from '../../../infra/db/prisma/repositories/available-slot.repository';
+import { ServiceRepositoryPrisma } from '../../../infra/db/prisma/repositories/service.repository';
 
 @Module({
-  imports: [PostgresModule],
+  imports: [PostgresModule, PrismaModule],
 })
 export class AppointmentUsecaseProxyModule {
   static LIST_APPOINTMENTS_USE_CASE = 'listAppointmentsUsecaseProxy';
@@ -19,47 +23,60 @@ export class AppointmentUsecaseProxyModule {
   static UPDATE_APPOINTMENT_USE_CASE = 'updateAppointmentUsecaseProxy';
   static REMOVE_APPOINTMENT_USE_CASE = 'removeAppointmentUsecaseProxy';
   static GET_APPOINTMENT_BY_CLIENTID_USE_CASE =
-    'getAppointmentByClientIdUsecaseProxy';
-
-  static register(): DynamicModule {
+    'getAppointmentByClientIdUsecaseProxy';  static register(): DynamicModule {
     return {
       module: AppointmentUsecaseProxyModule,
       providers: [
         {
-          inject: [AppointmentRepositoryPostgres],
+          inject: [AppointmentRepositoryPrisma],
           provide: AppointmentUsecaseProxyModule.LIST_APPOINTMENTS_USE_CASE,
-          useFactory: (repo: AppointmentRepositoryPostgres) =>
+          useFactory: (repo: AppointmentRepositoryPrisma) =>
             new UseCaseProxy(new ListAppointmentsUseCase(repo)),
         },
         {
-          inject: [AppointmentRepositoryPostgres],
+          inject: [AppointmentRepositoryPrisma],
           provide: AppointmentUsecaseProxyModule.GET_APPOINTMENT_BY_ID_USE_CASE,
-          useFactory: (repo: AppointmentRepositoryPostgres) =>
+          useFactory: (repo: AppointmentRepositoryPrisma) =>
             new UseCaseProxy(new GetAppointmentByIdUseCase(repo)),
         },
         {
-          inject: [AppointmentRepositoryPostgres],
+          inject: [
+            AppointmentRepositoryPrisma,
+            ServiceRepositoryPrisma,
+            AvailableSlotRepositoryPrisma,
+          ],
           provide: AppointmentUsecaseProxyModule.CREATE_APPOINTMENT_USE_CASE,
-          useFactory: (repo: AppointmentRepositoryPostgres) =>
-            new UseCaseProxy(new CreateAppointmentUseCase(repo)),
+          useFactory: (
+            repo: AppointmentRepositoryPrisma,
+            serviceRepo: ServiceRepositoryPrisma,
+            availableSlotRepo: AvailableSlotRepositoryPrisma,
+          ) => {
+            return new UseCaseProxy(
+              new CreateAppointmentUseCase(
+                repo,
+                serviceRepo,
+                availableSlotRepo,
+              ),
+            );
+          },
         },
         {
-          inject: [AppointmentRepositoryPostgres],
+          inject: [AppointmentRepositoryPrisma],
           provide: AppointmentUsecaseProxyModule.UPDATE_APPOINTMENT_USE_CASE,
-          useFactory: (repo: AppointmentRepositoryPostgres) =>
+          useFactory: (repo: AppointmentRepositoryPrisma) =>
             new UseCaseProxy(new UpdateAppointmentUseCase(repo)),
         },
         {
-          inject: [AppointmentRepositoryPostgres],
+          inject: [AppointmentRepositoryPrisma],
           provide: AppointmentUsecaseProxyModule.REMOVE_APPOINTMENT_USE_CASE,
-          useFactory: (repo: AppointmentRepositoryPostgres) =>
+          useFactory: (repo: AppointmentRepositoryPrisma) =>
             new UseCaseProxy(new RemoveAppointmentUseCase(repo)),
         },
         {
-          inject: [AppointmentRepositoryPostgres],
+          inject: [AppointmentRepositoryPrisma],
           provide:
             AppointmentUsecaseProxyModule.GET_APPOINTMENT_BY_CLIENTID_USE_CASE,
-          useFactory: (repo: AppointmentRepositoryPostgres) =>
+          useFactory: (repo: AppointmentRepositoryPrisma) =>
             new UseCaseProxy(new GetAppointmentByClientIdUseCase(repo)),
         },
       ],

@@ -14,6 +14,7 @@ import { StaffController } from './interfaces/controllers/staff.controller';
 import { AppointmentController } from './interfaces/controllers/appointment.controller';
 import { PlanController } from './interfaces/controllers/plan.controller';
 import { AuthController } from './interfaces/controllers/auth.controller';
+import { AvailableSlotController } from './interfaces/controllers/available-slot.controller';
 import { AuthModule } from './infra/auth/auth.module';
 import { ModuleRef } from '@nestjs/core';
 import { TenantUsecaseProxyModule } from './application/usecases/Tenants/tenant-usecase-proxy.module';
@@ -22,6 +23,7 @@ import { ClientUsecaseProxyModule } from './application/usecases/Clients/client-
 import { StaffUsecaseProxyModule } from './application/usecases/Staff/staff-usecase-proxy.module';
 import { AppointmentUsecaseProxyModule } from './application/usecases/Appointments/appointment-usecase-proxy.module';
 import { PlanUsecaseProxyModule } from './application/usecases/Plans/plan-usecase-proxy.module';
+import { AvailableSlotUsecaseProxyModule } from './application/usecases/AvailableSlots/available-slot-usecase-proxy.module';
 
 @Module({
   imports: [
@@ -36,6 +38,7 @@ import { PlanUsecaseProxyModule } from './application/usecases/Plans/plan-usecas
     StaffUsecaseProxyModule.register(),
     AppointmentUsecaseProxyModule.register(),
     PlanUsecaseProxyModule.register(),
+    AvailableSlotUsecaseProxyModule.register(),
   ],
   controllers: [
     TenantController,
@@ -45,6 +48,7 @@ import { PlanUsecaseProxyModule } from './application/usecases/Plans/plan-usecas
     AppointmentController,
     PlanController,
     AuthController,
+    AvailableSlotController,
   ],
   providers: [
     // Nenhum use case diretamente aqui!

@@ -8,10 +8,10 @@ import { PlatformAdminRepositoryPrisma } from './repositories/platform-admin.rep
 import { ServiceRepositoryPrisma } from './repositories/service.repository';
 import { StaffRepositoryPrisma } from './repositories/staff.repository';
 import { TenantRepositoryPrisma } from './repositories/tenant.repository';
+import { AvailableSlotRepositoryPrisma } from './repositories/available-slot.repository';
 
 @Global()
-@Module({
-  providers: [
+@Module({  providers: [
     PrismaService,
     ClientRepositoryPrisma,
     AppointmentRepositoryPrisma,
@@ -21,6 +21,7 @@ import { TenantRepositoryPrisma } from './repositories/tenant.repository';
     ServiceRepositoryPrisma,
     StaffRepositoryPrisma,
     TenantRepositoryPrisma,
+    AvailableSlotRepositoryPrisma,
   ],
   exports: [
     PrismaService,
@@ -32,6 +33,7 @@ import { TenantRepositoryPrisma } from './repositories/tenant.repository';
     ServiceRepositoryPrisma,
     StaffRepositoryPrisma,
     TenantRepositoryPrisma,
+    AvailableSlotRepositoryPrisma,
   ],
 })
 export class PrismaModule {}

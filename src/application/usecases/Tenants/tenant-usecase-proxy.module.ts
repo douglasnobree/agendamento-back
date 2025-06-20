@@ -23,28 +23,28 @@ export class TenantUsecaseProxyModule {
       module: TenantUsecaseProxyModule,
       providers: [
         {
-          inject: [TenantRepositoryPrisma],
+          inject: [TenantRepositoryPostgres],
           provide: TenantUsecaseProxyModule.LIST_TENANTS_USE_CASE,
-          useFactory: (repo: TenantRepositoryPrisma) =>
+          useFactory: (repo: TenantRepositoryPostgres) =>
             new UseCaseProxy(new ListTenantsUseCase(repo)),
         },
         {
-          inject: [TenantRepositoryPrisma],
+          inject: [TenantRepositoryPostgres],
           provide: TenantUsecaseProxyModule.CREATE_TENANT_USE_CASE,
-          useFactory: (repo: TenantRepositoryPrisma) => {
+          useFactory: (repo: TenantRepositoryPostgres) => {
             return new UseCaseProxy(new CreateTenantUseCase(repo));
           },
         },
         {
-          inject: [TenantRepositoryPrisma],
+          inject: [TenantRepositoryPostgres],
           provide: TenantUsecaseProxyModule.GET_TENANT_BY_ID_USE_CASE,
-          useFactory: (repo: TenantRepositoryPrisma) =>
+          useFactory: (repo: TenantRepositoryPostgres) =>
             new UseCaseProxy(new GetTenantByIdUseCase(repo)),
         },
         {
-          inject: [TenantRepositoryPrisma],
+          inject: [TenantRepositoryPostgres],
           provide: TenantUsecaseProxyModule.GET_TENANT_BY_SCHEMA_USE_CASE,
-          useFactory: (repo: TenantRepositoryPrisma) =>
+          useFactory: (repo: TenantRepositoryPostgres) =>
             new UseCaseProxy(new GetTenantBySchemaUseCase(repo)),
         },
       ],

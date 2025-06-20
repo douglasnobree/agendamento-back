@@ -49,14 +49,14 @@ export class CreateAppointmentUseCase
       this.availableSlotRepository,
     );
   }
-
   async execute(input: CreateAppointmentUseCaseInputDto): Promise<Appointment> {
     const { schema, data } = input;
     if (
       !data.clientId ||
       !data.serviceId ||
       !data.staffId ||
-      !data.scheduledAt ||
+      !data.scheduledDate ||
+      !data.scheduledTime ||
       !data.status
     ) {
       throw new BadRequestException('Todos os campos são obrigatórios');
@@ -73,18 +73,32 @@ export class CreateAppointmentUseCase
       );
     }
 
+    // Criar objeto Date a partir da data e hora fornecidas
+    const [year, month, day] = data.scheduledDate.split('-').map(Number);
+    const [hours, minutes] = data.scheduledTime.split(':').map(Number);
+    
+    // Mês em JavaScript é 0-indexed (0-11)
+    const scheduledAt = new Date(year, month - 1, day, hours, minutes, 0, 0);
+
+    console.log(`Data formatada: ${scheduledAt.toISOString()}`);
+    
     // Verificar se o horário está disponível
-    const scheduledAt = new Date(data.scheduledAt);
     const isAvailable = await this.availableSlotRepository.isSlotAvailable(
       schema,
       data.staffId,
       scheduledAt,
       service.duration,
     );
-
+    console.log(
+      `Verificando disponibilidade para staffId: ${data.staffId}, scheduledAt: ${scheduledAt}, duration: ${service.duration}`,
+    );
+    console.log(isAvailable);
     if (!isAvailable) {
       throw new ConflictException('Horário não disponível para agendamento');
     }
+    console.log(
+      `Horário disponível para agendamento: staffId: ${data.staffId}, scheduledAt: ${scheduledAt}, duration: ${service.duration}`,
+    );
 
     const appointment = Appointment.create(
       data.clientId,

@@ -7,6 +7,7 @@ import { UpdateClientUseCase } from './client-useCase-update';
 import { RemoveClientUseCase } from './client-useCase-remove';
 import { UseCaseProxy } from '../usecase-proxy';
 import { PrismaModule } from '../../../infra/db/prisma/prisma.module';
+import { ClientRepositoryPostgres } from 'src/infra/db/postgres/repositories/client.repository';
 
 @Module({
   imports: [PrismaModule],
@@ -23,33 +24,33 @@ export class ClientUsecaseProxyModule {
       module: ClientUsecaseProxyModule,
       providers: [
         {
-          inject: [ClientRepositoryPrisma],
+          inject: [ClientRepositoryPostgres],
           provide: ClientUsecaseProxyModule.LIST_CLIENTS_USE_CASE,
-          useFactory: (repo: ClientRepositoryPrisma) =>
+          useFactory: (repo: ClientRepositoryPostgres) =>
             new UseCaseProxy(new ListClientsUseCase(repo)),
         },
         {
-          inject: [ClientRepositoryPrisma],
+          inject: [ClientRepositoryPostgres],
           provide: ClientUsecaseProxyModule.GET_CLIENT_BY_ID_USE_CASE,
-          useFactory: (repo: ClientRepositoryPrisma) =>
+          useFactory: (repo: ClientRepositoryPostgres) =>
             new UseCaseProxy(new GetClientByIdUseCase(repo)),
         },
         {
-          inject: [ClientRepositoryPrisma],
+          inject: [ClientRepositoryPostgres],
           provide: ClientUsecaseProxyModule.CREATE_CLIENT_USE_CASE,
-          useFactory: (repo: ClientRepositoryPrisma) =>
+          useFactory: (repo: ClientRepositoryPostgres) =>
             new UseCaseProxy(new CreateClientUseCase(repo)),
         },
         {
-          inject: [ClientRepositoryPrisma],
+          inject: [ClientRepositoryPostgres],
           provide: ClientUsecaseProxyModule.UPDATE_CLIENT_USE_CASE,
-          useFactory: (repo: ClientRepositoryPrisma) =>
+          useFactory: (repo: ClientRepositoryPostgres) =>
             new UseCaseProxy(new UpdateClientUseCase(repo)),
         },
         {
-          inject: [ClientRepositoryPrisma],
+          inject: [ClientRepositoryPostgres],
           provide: ClientUsecaseProxyModule.REMOVE_CLIENT_USE_CASE,
-          useFactory: (repo: ClientRepositoryPrisma) =>
+          useFactory: (repo: ClientRepositoryPostgres) =>
             new UseCaseProxy(new RemoveClientUseCase(repo)),
         },
       ],

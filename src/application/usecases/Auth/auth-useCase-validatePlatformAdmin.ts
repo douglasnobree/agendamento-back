@@ -1,6 +1,8 @@
 import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 import { PlatformAdminRepository } from '../../../domain/repositoriesInterface/platform-admin.repository-interface';
 import { UseCase } from '../useCase';
+import * as bcrypt from 'bcrypt';
+
 
 export interface ValidatePlatformAdminDto {
   email: string;

@@ -7,38 +7,54 @@ import { ServiceRepository } from '../../../../domain/repositoriesInterface/serv
 export class ServiceRepositoryPrisma implements ServiceRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  private async setSchema(schema: string) {
-    await this.prisma.$executeRawUnsafe(`SET search_path TO "${schema}"`);
-  }
-
   async findById(schema: string, id: string): Promise<Service | null> {
-    await this.setSchema(schema);
-    const data = await this.prisma.service.findUnique({ where: { id } });
-    if (!data) return null;
-    return Service.fromPersistence(data);
+    const result = await this.prisma.executeRaw<any[]>(
+      `SELECT * FROM "${schema}"."Service" WHERE id = $1`,
+      [id],
+    );
+
+    if (!result || result.length === 0) return null;
+    return Service.fromPersistence(result[0]);
   }
 
   async findAll(schema: string): Promise<Service[]> {
     console.log(`Using prisma service repository with schema: ${schema}`);
-    await this.setSchema(schema);
-    const data = await this.prisma.service.findMany();
-    return data.map(Service.fromPersistence);
+
+    const result = await this.prisma.executeRaw<any[]>(
+      `SELECT * FROM "${schema}"."Service"`,
+    );
+
+    if (!result || result.length === 0) return [];
+    return result.map(Service.fromPersistence);
   }
 
   async save(schema: string, service: Service): Promise<void> {
-    await this.setSchema(schema);
     const props = service.toPersistence();
-    await this.prisma.service.create({ data: props });
+    await this.prisma.executeRaw(
+      `INSERT INTO "${schema}"."Service" (id, name, description, duration, price, "createdAt") VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        props.id,
+        props.name,
+        props.description,
+        props.duration,
+        props.price,
+        props.createdAt,
+      ],
+    );
   }
 
   async remove(schema: string, id: string): Promise<void> {
-    await this.setSchema(schema);
-    await this.prisma.service.delete({ where: { id } });
+    await this.prisma.executeRaw(
+      `DELETE FROM "${schema}"."Service" WHERE id = $1`,
+      [id],
+    );
   }
 
   async update(schema: string, service: Service): Promise<void> {
-    await this.setSchema(schema);
     const props = service.toPersistence();
-    await this.prisma.service.update({ where: { id: props.id }, data: props });
+    await this.prisma.executeRaw(
+      `UPDATE "${schema}"."Service" SET name = $1, description = $2, duration = $3, price = $4 WHERE id = $5`,
+      [props.name, props.description, props.duration, props.price, props.id],
+    );
   }
 }

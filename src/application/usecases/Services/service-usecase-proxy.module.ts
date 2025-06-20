@@ -24,33 +24,33 @@ export class ServiceUsecaseProxyModule {
       module: ServiceUsecaseProxyModule,
       providers: [
         {
-          inject: [ServiceRepositoryPrisma],
+          inject: [ServiceRepositoryPostgres],
           provide: ServiceUsecaseProxyModule.LIST_SERVICES_USE_CASE,
-          useFactory: (repo: ServiceRepositoryPrisma) =>
+          useFactory: (repo: ServiceRepositoryPostgres) =>
             new UseCaseProxy(new ListServicesUseCase(repo)),
         },
         {
-          inject: [ServiceRepositoryPrisma],
+          inject: [ServiceRepositoryPostgres],
           provide: ServiceUsecaseProxyModule.GET_SERVICE_BY_ID_USE_CASE,
-          useFactory: (repo: ServiceRepositoryPrisma) =>
+          useFactory: (repo: ServiceRepositoryPostgres) =>
             new UseCaseProxy(new GetServiceByIdUseCase(repo)),
         },
         {
-          inject: [ServiceRepositoryPrisma],
+          inject: [ServiceRepositoryPostgres],
           provide: ServiceUsecaseProxyModule.CREATE_SERVICE_USE_CASE,
-          useFactory: (repo: ServiceRepositoryPrisma) =>
+          useFactory: (repo: ServiceRepositoryPostgres) =>
             new UseCaseProxy(new CreateServiceUseCase(repo)),
         },
         {
-          inject: [ServiceRepositoryPrisma],
+          inject: [ServiceRepositoryPostgres],
           provide: ServiceUsecaseProxyModule.UPDATE_SERVICE_USE_CASE,
-          useFactory: (repo: ServiceRepositoryPrisma) =>
+          useFactory: (repo: ServiceRepositoryPostgres) =>
             new UseCaseProxy(new UpdateServiceUseCase(repo)),
         },
         {
-          inject: [ServiceRepositoryPrisma],
+          inject: [ServiceRepositoryPostgres],
           provide: ServiceUsecaseProxyModule.REMOVE_SERVICE_USE_CASE,
-          useFactory: (repo: ServiceRepositoryPrisma) =>
+          useFactory: (repo: ServiceRepositoryPostgres) =>
             new UseCaseProxy(new RemoveServiceUseCase(repo)),
         },
       ],

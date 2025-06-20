@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsString, Matches } from 'class-validator';
 
 export class CreateAppointmentDto {
   @ApiProperty({ description: 'ID do cliente', example: 'client-uuid' })
@@ -18,12 +18,22 @@ export class CreateAppointmentDto {
   staffId: string;
 
   @ApiProperty({
-    description: 'Data e hora agendada',
-    example: '2025-05-20T14:00:00.000Z',
+    description: 'Data do agendamento (YYYY-MM-DD)',
+    example: '2025-06-19',
   })
-  @IsDateString()
-  @IsNotEmpty({ message: 'A data/hora é obrigatória' })
-  scheduledAt: Date;
+  @IsString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'A data deve estar no formato YYYY-MM-DD' })
+  @IsNotEmpty({ message: 'A data é obrigatória' })
+  scheduledDate: string;
+
+  @ApiProperty({
+    description: 'Horário do agendamento (HH:MM)',
+    example: '14:30',
+  })
+  @IsString()
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'O horário deve estar no formato HH:MM (24h)' })
+  @IsNotEmpty({ message: 'O horário é obrigatório' })
+  scheduledTime: string;
 
   @ApiProperty({ description: 'Status', example: 'pending' })
   @IsString()
@@ -57,14 +67,37 @@ export class UpdateAppointmentDto {
   staffId?: string;
 
   @ApiProperty({
-    description: 'Data e hora agendada',
-    example: '2025-05-20T14:00:00.000Z',
+    description: 'Data do agendamento (YYYY-MM-DD)',
+    example: '2025-06-19',
     required: false,
   })
-  @IsDateString()
-  scheduledAt?: Date;
+  @IsString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'A data deve estar no formato YYYY-MM-DD' })
+  scheduledDate?: string;
 
-  @ApiProperty({ description: 'Status', example: 'pending', required: false })
+  @ApiProperty({
+    description: 'Horário do agendamento (HH:MM)',
+    example: '14:30',
+    required: false,
+  })
+  @IsString()
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'O horário deve estar no formato HH:MM (24h)' })
+  scheduledTime?: string;
+
+  @ApiProperty({
+    description: 'Status',
+    example: 'confirmed',
+    required: false,
+  })
   @IsString()
   status?: string;
+}
+
+export class AvailableTimeslotsResponseDto {
+  @ApiProperty({
+    description: 'Lista de horários disponíveis no formato YYYY-MM-DD HH:MM',
+    type: [String],
+    example: ['2025-06-19 10:00', '2025-06-19 10:30', '2025-06-19 11:00'],
+  })
+  availableTimeslots: string[];
 }

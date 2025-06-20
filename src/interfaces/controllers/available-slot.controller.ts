@@ -19,6 +19,9 @@ import {
   ApiTags,
   ApiOperation,
   ApiResponse,
+  ApiParam,
+  ApiQuery,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { AvailableSlotUsecaseProxyModule } from '../../application/usecases/AvailableSlots/available-slot-usecase-proxy.module';
 import { CreateAvailableSlotUseCase } from '../../application/usecases/AvailableSlots/available-slot-useCase-create';
@@ -38,11 +41,12 @@ import {
 @Controller('api/tenant/available-slots')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
+
 @ApiHeader({
   name: 'x-tenant-id',
-  description: 'Identificador do tenant',
+  description: 'Identificador único do tenant (empresa/estabelecimento)',
   required: true,
-  schema: { type: 'string' },
+  schema: { type: 'string', example: 'empresa-abc123' },
 })
 export class AvailableSlotController {
   constructor(
@@ -55,13 +59,48 @@ export class AvailableSlotController {
     @Inject(AvailableSlotUsecaseProxyModule.GET_AVAILABLE_TIMESLOTS_USE_CASE)
     private readonly getAvailableTimeslotsUseCaseProxy: UseCaseProxy<GetAvailableTimeslotsUseCase>,
   ) {}
-
   @Post()
   @Roles('owner', 'admin')
-  @ApiOperation({ summary: 'Criar um novo horário disponível' })
+  @ApiOperation({
+    summary: 'Criar um novo horário disponível',
+    description:
+      'Cria um novo horário em que o funcionário estará disponível para agendamentos. Pode ser um horário recorrente (semanal) ou específico para uma data.',
+  })
   @ApiResponse({
     status: 201,
     description: 'Horário disponível criado com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', example: '550e8400-e29b-41d4-a716-446655440000' },
+        staffId: {
+          type: 'string',
+          example: '550e8400-e29b-41d4-a716-446655440001',
+        },
+        dayOfWeek: {
+          type: 'number',
+          example: 1,
+          description: '0 = domingo, 1 = segunda, ..., 6 = sábado',
+        },
+        startTime: { type: 'string', example: '2025-06-19T09:00:00.000Z' },
+        endTime: { type: 'string', example: '2025-06-19T17:00:00.000Z' },
+        isRecurring: { type: 'boolean', example: true },
+        specificDate: { type: 'string', example: null },
+        createdAt: { type: 'string', example: '2025-06-19T15:30:00.000Z' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Parâmetros inválidos na requisição',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado - Permissões insuficientes',
   })
   async create(@Body() createDto: CreateAvailableSlotDto, @Req() req) {
     const schema = req.tenantSchema;
@@ -111,13 +150,62 @@ export class AvailableSlotController {
       createdAt: availableSlot.createdAt?.toISOString(),
     };
   }
-
   @Get('staff/:staffId')
   @Roles('owner', 'admin', 'staff')
   @ApiOperation({
     summary: 'Obter todos os horários disponíveis de um funcionário',
+    description:
+      'Retorna todos os horários disponíveis cadastrados para um funcionário específico, incluindo os recorrentes e os específicos para datas.',
   })
-  @ApiResponse({ status: 200, description: 'Lista de horários disponíveis' })
+  @ApiParam({
+    name: 'staffId',
+    description: 'ID único do funcionário',
+    type: 'string',
+    example: '550e8400-e29b-41d4-a716-446655440001',
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de horários disponíveis',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            example: '550e8400-e29b-41d4-a716-446655440000',
+          },
+          staffId: {
+            type: 'string',
+            example: '550e8400-e29b-41d4-a716-446655440001',
+          },
+          dayOfWeek: {
+            type: 'number',
+            example: 1,
+            description: '0 = domingo, 1 = segunda, ..., 6 = sábado',
+          },
+          startTime: { type: 'string', example: '2025-06-19T09:00:00.000Z' },
+          endTime: { type: 'string', example: '2025-06-19T17:00:00.000Z' },
+          isRecurring: { type: 'boolean', example: true },
+          specificDate: { type: 'string', example: null },
+          createdAt: { type: 'string', example: '2025-06-19T15:30:00.000Z' },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado - Permissões insuficientes',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Funcionário não encontrado',
+  })
   async findByStaffId(@Param('staffId') staffId: string, @Req() req) {
     const schema = req.tenantSchema;
 
@@ -139,15 +227,67 @@ export class AvailableSlotController {
       createdAt: slot.createdAt?.toISOString(),
     }));
   }
-
   @Get('available-timeslots')
   @ApiOperation({
     summary: 'Obter todos os horários disponíveis em um período',
+    description:
+      'Retorna todos os horários em que um funcionário está disponível para agendamento de um serviço específico dentro de um período. Considera a duração do serviço e os agendamentos já existentes.',
+  })
+  @ApiQuery({
+    name: 'staffId',
+    description: 'ID único do funcionário',
+    type: 'string',
+    example: '550e8400-e29b-41d4-a716-446655440001',
+    required: true,
+  })
+  @ApiQuery({
+    name: 'serviceId',
+    description:
+      'ID único do serviço para calcular o tempo de duração do agendamento',
+    type: 'string',
+    example: '550e8400-e29b-41d4-a716-446655440002',
+    required: true,
+  })
+  @ApiQuery({
+    name: 'startDate',
+    description:
+      'Data inicial para buscar os horários disponíveis (formato ISO)',
+    type: 'string',
+    example: '2025-06-19T00:00:00.000Z',
+    required: true,
+  })
+  @ApiQuery({
+    name: 'endDate',
+    description: 'Data final para buscar os horários disponíveis (formato ISO)',
+    type: 'string',
+    example: '2025-06-26T23:59:59.999Z',
+    required: true,
   })
   @ApiResponse({
     status: 200,
     description: 'Lista de horários disponíveis',
     type: AvailableTimeslotsResponseDto,
+    schema: {
+      properties: {
+        availableTimeslots: {
+          type: 'array',
+          description:
+            'Lista de timestamps ISO representando os horários disponíveis',
+          items: {
+            type: 'string',
+            example: '2025-06-19T10:00:00.000Z',
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Parâmetros inválidos na requisição',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
   })
   async getAvailableTimeslots(
     @Query() queryParams: GetAvailableTimeslotsDto,

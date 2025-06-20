@@ -7,6 +7,8 @@ import { PostgresModule } from '../../../infra/db/postgres/postgres.module';
 import { PrismaModule } from '../../../infra/db/prisma/prisma.module';
 import { AvailableSlotRepositoryPrisma } from '../../../infra/db/prisma/repositories/available-slot.repository';
 import { ServiceRepositoryPrisma } from '../../../infra/db/prisma/repositories/service.repository';
+import { AvailableSlotRepositoryPostgres } from 'src/infra/db/postgres/repositories/available-slot.repository';
+import { ServiceRepositoryPostgres } from 'src/infra/db/postgres/repositories/service.repository';
 
 @Module({
   imports: [PostgresModule, PrismaModule],
@@ -22,34 +24,34 @@ export class AvailableSlotUsecaseProxyModule {
       module: AvailableSlotUsecaseProxyModule,
       providers: [
         {
-          inject: [AvailableSlotRepositoryPrisma],
+          inject: [AvailableSlotRepositoryPostgres],
           provide:
             AvailableSlotUsecaseProxyModule.CREATE_AVAILABLE_SLOT_USE_CASE,
           useFactory: (
-            availableSlotRepository: AvailableSlotRepositoryPrisma,
+            availableSlotRepository: AvailableSlotRepositoryPostgres,
           ) =>
             new UseCaseProxy(
               new CreateAvailableSlotUseCase(availableSlotRepository),
             ),
         },
         {
-          inject: [AvailableSlotRepositoryPrisma],
+          inject: [AvailableSlotRepositoryPostgres],
           provide:
             AvailableSlotUsecaseProxyModule.GET_AVAILABLE_SLOTS_BY_STAFF_ID_USE_CASE,
           useFactory: (
-            availableSlotRepository: AvailableSlotRepositoryPrisma,
+            availableSlotRepository: AvailableSlotRepositoryPostgres,
           ) =>
             new UseCaseProxy(
               new GetAvailableSlotByStaffIdUseCase(availableSlotRepository),
             ),
         },
         {
-          inject: [AvailableSlotRepositoryPrisma, ServiceRepositoryPrisma],
+          inject: [AvailableSlotRepositoryPostgres, ServiceRepositoryPostgres],
           provide:
             AvailableSlotUsecaseProxyModule.GET_AVAILABLE_TIMESLOTS_USE_CASE,
           useFactory: (
-            availableSlotRepository: AvailableSlotRepositoryPrisma,
-            serviceRepository: ServiceRepositoryPrisma,
+            availableSlotRepository: AvailableSlotRepositoryPostgres,
+            serviceRepository: ServiceRepositoryPostgres,
           ) =>
             new UseCaseProxy(
               new GetAvailableTimeslotsUseCase(

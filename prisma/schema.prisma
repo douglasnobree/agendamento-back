@@ -43,13 +43,13 @@ model Tenant {
   @@schema("public")
 }
 
-// Modelos para os schemas de tenant
+// Modelos para o schema "tenant" (válido pra múltiplos schemas via multiSchema no client)
 model Owner {
   id        String   @id @default(uuid())
   email     String   @unique
   name      String
   password  String?
-  oauthType String? // 'google' | 'facebook' etc
+  oauthType String?
   oauthId   String?  @unique
   createdAt DateTime @default(now())
 
@@ -71,7 +71,7 @@ model Service {
   id           String        @id @default(uuid())
   name         String
   description  String?
-  duration     Int // minutos
+  duration     Int
   price        Float
   appointments Appointment[]
   createdAt    DateTime      @default(now())
@@ -98,7 +98,7 @@ model Appointment {
   serviceId   String
   staffId     String
   scheduledAt DateTime
-  status      String // 'pending' | 'confirmed' | 'cancelled'
+  status      String
   client      Client   @relation(fields: [clientId], references: [id])
   service     Service  @relation(fields: [serviceId], references: [id])
   staff       Staff    @relation(fields: [staffId], references: [id])
@@ -111,11 +111,11 @@ model AvailableSlot {
   id           String    @id @default(uuid())
   staffId      String
   staff        Staff     @relation(fields: [staffId], references: [id])
-  dayOfWeek    Int // 0-6 (0 = domingo, 6 = sábado)
-  startTime    DateTime // Hora de início (somente a parte de tempo é relevante)
-  endTime      DateTime // Hora de fim (somente a parte de tempo é relevante)
-  isRecurring  Boolean   @default(true) // Se é recorrente toda semana
-  specificDate DateTime? // Data específica, usado quando isRecurring = false
+  dayOfWeek    Int
+  startTime    DateTime
+  endTime      DateTime
+  isRecurring  Boolean   @default(true)
+  specificDate DateTime?
   createdAt    DateTime  @default(now())
 
   @@schema("tenant")

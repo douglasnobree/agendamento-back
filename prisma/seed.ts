@@ -37,7 +37,7 @@ async function main() {
         email: 'admin@agendamento.com',
         name: 'Administrador da Plataforma',
         password:
-          '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6xNekdHgTGmrpHEfIoxm', // senha: 'senha123'
+          '$2b$10$3FrkzKngV5oVJmSxUdLUs.x/TjD2/nQhRyZlXfRsxtzK2sqyPJc.C', // senha: 'senha123'
       },
     });
 

@@ -21,7 +21,9 @@ export class AvailableSlotRepositoryPostgres
 
   // Método auxiliar para converter minutos para string de hora (HH:MM)
   private minutesToTime(minutes: number): string {
-    const hours = Math.floor(minutes / 60).toString().padStart(2, '0');
+    const hours = Math.floor(minutes / 60)
+      .toString()
+      .padStart(2, '0');
     const mins = (minutes % 60).toString().padStart(2, '0');
     return `${hours}:${mins}`;
   }
@@ -32,9 +34,12 @@ export class AvailableSlotRepositoryPostgres
   }
 
   // Método auxiliar para criar uma data a partir de um dia e um horário
-  private createDateFromTimeString(dateOrDayIndex: Date | number, timeString: string): Date {
+  private createDateFromTimeString(
+    dateOrDayIndex: Date | number,
+    timeString: string,
+  ): Date {
     let date: Date;
-    
+
     if (typeof dateOrDayIndex === 'number') {
       // Calcular próxima data com esse dia da semana
       const today = new Date();
@@ -46,7 +51,7 @@ export class AvailableSlotRepositoryPostgres
       // Usar a data fornecida
       date = new Date(dateOrDayIndex);
     }
-    
+
     const [hours, minutes] = timeString.split(':').map(Number);
     date.setHours(hours, minutes, 0, 0);
     return date;
@@ -222,17 +227,21 @@ export class AvailableSlotRepositoryPostgres
   ): Promise<boolean> {
     await this.setSchema(schema);
 
-    console.log('==== VERIFICAÇÃO DE DISPONIBILIDADE DE HORÁRIO SIMPLIFICADA ====');
+    console.log(
+      '==== VERIFICAÇÃO DE DISPONIBILIDADE DE HORÁRIO SIMPLIFICADA ====',
+    );
     console.log(`Staff ID: ${staffId}`);
-    
+
     // Extrair dados da data
     const targetDate = new Date(dateTime);
     const dayOfWeek = targetDate.getDay();
     const targetTimeString = this.formatTimeFromDate(dateTime);
     console.log(`Data solicitada: ${targetDate.toISOString()}`);
     console.log(`Horário solicitado: ${targetTimeString}`);
-    console.log(`Dia da semana: ${dayOfWeek} (0=domingo, 1=segunda, ..., 6=sábado)`);
-    
+    console.log(
+      `Dia da semana: ${dayOfWeek} (0=domingo, 1=segunda, ..., 6=sábado)`,
+    );
+
     // Calcular horário de término com base na duração
     const targetStartMinutes = this.timeToMinutes(targetTimeString);
     const targetEndMinutes = targetStartMinutes + durationMinutes;
@@ -256,21 +265,21 @@ export class AvailableSlotRepositoryPostgres
     `;
 
     const slotParams = [
-      staffId, 
+      staffId,
       dayOfWeek,
       targetStartMinutes,
       targetEndMinutes,
-      targetDate
+      targetDate,
     ];
 
     console.log('Verificando slots disponíveis...');
     const slotResult = await this.postgres.query(slotQuery, slotParams);
-    
+
     if (slotResult.rows.length === 0) {
       console.log('Nenhum slot disponível encontrado para esse horário');
       return false;
     }
-    
+
     console.log('Slot disponível encontrado');
 
     // 2. Verificar se já existe algum agendamento no horário solicitado
@@ -296,7 +305,12 @@ export class AvailableSlotRepositoryPostgres
     `;
 
     // Parâmetros para a consulta
-    const conflictParams = [staffId, targetDate, targetStartMinutes, targetEndMinutes];
+    const conflictParams = [
+      staffId,
+      targetDate,
+      targetStartMinutes,
+      targetEndMinutes,
+    ];
 
     // Se estiver atualizando um agendamento, ignorar o próprio agendamento
     if (excludeAppointmentId) {
@@ -307,11 +321,16 @@ export class AvailableSlotRepositoryPostgres
     conflictQuery += ' LIMIT 1';
 
     console.log('Verificando conflitos...');
-    const conflictResult = await this.postgres.query(conflictQuery, conflictParams);
-    
+    const conflictResult = await this.postgres.query(
+      conflictQuery,
+      conflictParams,
+    );
+
     const isAvailable = conflictResult.rows.length === 0;
-    console.log(`Resultado final: ${isAvailable ? 'DISPONÍVEL' : 'NÃO DISPONÍVEL'}`);
-    
+    console.log(
+      `Resultado final: ${isAvailable ? 'DISPONÍVEL' : 'NÃO DISPONÍVEL'}`,
+    );
+
     return isAvailable;
   }
 
@@ -324,15 +343,15 @@ export class AvailableSlotRepositoryPostgres
   ): Promise<Date[]> {
     await this.setSchema(schema);
     console.log('==== BUSCANDO HORÁRIOS DISPONÍVEIS SIMPLIFICADO ====');
-    
+
     const availableTimeslots: Date[] = [];
     const currentDate = new Date(startDate);
-    
+
     // Para cada dia dentro do período
     while (currentDate <= endDate) {
       const dayOfWeek = currentDate.getDay();
       const currentDateStr = currentDate.toISOString().split('T')[0];
-      
+
       // Buscar slots disponíveis para esse dia (recorrentes e específicos)
       const slotsQuery = `
         SELECT * FROM "AvailableSlot"
@@ -343,48 +362,55 @@ export class AvailableSlotRepositoryPostgres
         )
         ORDER BY "startTime"
       `;
-      
+
       const slotsResult = await this.postgres.query(slotsQuery, [
         staffId,
         dayOfWeek,
-        currentDate
+        currentDate,
       ]);
-      
+
       // Para cada slot disponível, gerar os horários possíveis
       for (const slot of slotsResult.rows) {
         // Converter horas para minutos para facilitar cálculos
         const startHour = slot.startTime.getHours();
         const startMinute = slot.startTime.getMinutes();
         const startMinutes = startHour * 60 + startMinute;
-        
+
         const endHour = slot.endTime.getHours();
         const endMinute = slot.endTime.getMinutes();
         const endMinutes = endHour * 60 + endMinute;
-        
+
         // Gerar horários a cada 30 minutos (ou outro intervalo definido)
         const interval = 30; // minutos
-        for (let timeMinutes = startMinutes; timeMinutes <= endMinutes - serviceDurationMinutes; timeMinutes += interval) {
+        for (
+          let timeMinutes = startMinutes;
+          timeMinutes <= endMinutes - serviceDurationMinutes;
+          timeMinutes += interval
+        ) {
           // Verificar se este horário específico está disponível
           const timeString = this.minutesToTime(timeMinutes);
-          const potentialDateTime = this.createDateFromTimeString(new Date(currentDateStr), timeString);
-          
+          const potentialDateTime = this.createDateFromTimeString(
+            new Date(currentDateStr),
+            timeString,
+          );
+
           const isAvailable = await this.isSlotAvailable(
             schema,
             staffId,
             potentialDateTime,
-            serviceDurationMinutes
+            serviceDurationMinutes,
           );
-          
+
           if (isAvailable) {
             availableTimeslots.push(potentialDateTime);
           }
         }
       }
-      
+
       // Avançar para o próximo dia
       currentDate.setDate(currentDate.getDate() + 1);
     }
-    
+
     return availableTimeslots;
   }
 

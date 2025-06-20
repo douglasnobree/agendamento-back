@@ -268,9 +268,10 @@ export class AppointmentController {
   @ApiResponse({
     status: 409,
     description: 'Conflito - Horário não disponível para agendamento',
-  })  async create(@Req() req: Request, @Body() data: CreateAppointmentDto) {
+  })
+  async create(@Req() req: Request, @Body() data: CreateAppointmentDto) {
     const tenantSchema = (req as any).tenantSchema;
-    
+
     // Converter para o formato esperado pelo use case
     const inputDto = {
       clientId: data.clientId,
@@ -278,9 +279,9 @@ export class AppointmentController {
       staffId: data.staffId,
       scheduledDate: data.scheduledDate,
       scheduledTime: data.scheduledTime,
-      status: data.status
+      status: data.status,
     };
-    
+
     return this.createAppointmentUseCaseProxy.getInstance().execute({
       schema: tenantSchema,
       data: inputDto,
@@ -343,25 +344,26 @@ export class AppointmentController {
   @ApiResponse({
     status: 409,
     description: 'Conflito - Novo horário não disponível para agendamento',
-  })  async update(
+  })
+  async update(
     @Req() req: Request,
     @Param('id') id: string,
     @Body() data: UpdateAppointmentDto,
   ) {
     const tenantSchema = (req as any).tenantSchema;
-    
+
     // Converter para o formato esperado pelo use case
     const inputDto: any = { id };
-    
+
     if (data.clientId) inputDto.clientId = data.clientId;
     if (data.serviceId) inputDto.serviceId = data.serviceId;
     if (data.staffId) inputDto.staffId = data.staffId;
     if (data.status) inputDto.status = data.status;
-    
+
     // Adicionar dados de data/hora se fornecidos
     if (data.scheduledDate) inputDto.scheduledDate = data.scheduledDate;
     if (data.scheduledTime) inputDto.scheduledTime = data.scheduledTime;
-    
+
     return this.updateAppointmentUseCaseProxy.getInstance().execute({
       schema: tenantSchema,
       data: inputDto,

@@ -6,4 +6,3 @@ export interface CreateAppointmentInputDto {
   scheduledTime: string; // Formato HH:MM (24h)
   status: string;
 }
-

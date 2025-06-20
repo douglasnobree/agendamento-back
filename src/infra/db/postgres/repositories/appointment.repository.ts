@@ -19,16 +19,16 @@ export class AppointmentRepositoryPostgres implements AppointmentRepository {
   private parseTimeString(dateValue: string, timeString: string): Date {
     // Separar horas e minutos
     const [hours, minutes] = timeString.split(':').map(Number);
-    
+
     // Criar um objeto Date a partir da data fornecida
     const date = new Date(dateValue);
-    
+
     // Definir horas e minutos
     date.setHours(hours, minutes, 0, 0);
-    
+
     return date;
   }
-  
+
   // Método auxiliar para converter Date para string de hora (HH:MM)
   private formatTimeToString(date: Date): string {
     const hours = date.getHours().toString().padStart(2, '0');
@@ -46,7 +46,10 @@ export class AppointmentRepositoryPostgres implements AppointmentRepository {
     return Appointment.fromPersistence(result.rows[0]);
   }
 
-  async findAppointmentsByClientId(schema: string, clientId: string): Promise<Appointment[]> {
+  async findAppointmentsByClientId(
+    schema: string,
+    clientId: string,
+  ): Promise<Appointment[]> {
     await this.setSchema(schema);
     const result = await this.postgres.query<AppointmentProps>(
       `SELECT * FROM "Appointment" WHERE "clientId" = $1`,
@@ -82,10 +85,7 @@ export class AppointmentRepositoryPostgres implements AppointmentRepository {
 
   async remove(schema: string, id: string): Promise<void> {
     await this.setSchema(schema);
-    await this.postgres.query(
-      `DELETE FROM "Appointment" WHERE id = $1`,
-      [id],
-    );
+    await this.postgres.query(`DELETE FROM "Appointment" WHERE id = $1`, [id]);
   }
 
   async update(schema: string, appointment: Appointment): Promise<void> {

@@ -76,12 +76,12 @@ export class CreateAppointmentUseCase
     // Criar objeto Date a partir da data e hora fornecidas
     const [year, month, day] = data.scheduledDate.split('-').map(Number);
     const [hours, minutes] = data.scheduledTime.split(':').map(Number);
-    
+
     // Mês em JavaScript é 0-indexed (0-11)
     const scheduledAt = new Date(year, month - 1, day, hours, minutes, 0, 0);
 
     console.log(`Data formatada: ${scheduledAt.toISOString()}`);
-    
+
     // Verificar se o horário está disponível
     const isAvailable = await this.availableSlotRepository.isSlotAvailable(
       schema,

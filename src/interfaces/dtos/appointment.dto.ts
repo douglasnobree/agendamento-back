@@ -22,7 +22,9 @@ export class CreateAppointmentDto {
     example: '2025-06-19',
   })
   @IsString()
-  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'A data deve estar no formato YYYY-MM-DD' })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'A data deve estar no formato YYYY-MM-DD',
+  })
   @IsNotEmpty({ message: 'A data é obrigatória' })
   scheduledDate: string;
 
@@ -31,7 +33,9 @@ export class CreateAppointmentDto {
     example: '14:30',
   })
   @IsString()
-  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'O horário deve estar no formato HH:MM (24h)' })
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+    message: 'O horário deve estar no formato HH:MM (24h)',
+  })
   @IsNotEmpty({ message: 'O horário é obrigatório' })
   scheduledTime: string;
 
@@ -72,7 +76,9 @@ export class UpdateAppointmentDto {
     required: false,
   })
   @IsString()
-  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'A data deve estar no formato YYYY-MM-DD' })
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'A data deve estar no formato YYYY-MM-DD',
+  })
   scheduledDate?: string;
 
   @ApiProperty({
@@ -81,7 +87,9 @@ export class UpdateAppointmentDto {
     required: false,
   })
   @IsString()
-  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'O horário deve estar no formato HH:MM (24h)' })
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+    message: 'O horário deve estar no formato HH:MM (24h)',
+  })
   scheduledTime?: string;
 
   @ApiProperty({

@@ -9,18 +9,18 @@ import {
   UseGuards,
   Inject,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../decorators/roles.decorator';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { RolesGuard } from '../../auth/roles.guard';
+import { Roles } from '../../decorators/roles.decorator';
 import { ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
-import { CreatePlanDto, UpdatePlanDto } from '../dtos/plan.dto';
-import { PlanUsecaseProxyModule } from '../../application/usecases/Plans/plan-usecase-proxy.module';
-import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
-import { ListPlansUseCase } from '../../application/usecases/Plans/plan-useCase-list';
-import { GetPlanByIdUseCase } from '../../application/usecases/Plans/plan-useCase-getById';
-import { CreatePlanUseCase } from '../../application/usecases/Plans/plan-useCase-create';
-import { UpdatePlanUseCase } from '../../application/usecases/Plans/plan-useCase-update';
-import { RemovePlanUseCase } from '../../application/usecases/Plans/plan-useCase-remove';
+import { CreatePlanDto, UpdatePlanDto } from '../../dtos/plan.dto';
+import { PlanUsecaseProxyModule } from '../../../application/usecases/Plans/plan-usecase-proxy.module';
+import { UseCaseProxy } from '../../../application/usecases/usecase-proxy';
+import { ListPlansUseCase } from '../../../application/usecases/Plans/plan-useCase-list';
+import { GetPlanByIdUseCase } from '../../../application/usecases/Plans/plan-useCase-getById';
+import { CreatePlanUseCase } from '../../../application/usecases/Plans/plan-useCase-create';
+import { UpdatePlanUseCase } from '../../../application/usecases/Plans/plan-useCase-update';
+import { RemovePlanUseCase } from '../../../application/usecases/Plans/plan-useCase-remove';
 
 @Controller('admin/plans')
 @UseGuards(JwtAuthGuard, RolesGuard)

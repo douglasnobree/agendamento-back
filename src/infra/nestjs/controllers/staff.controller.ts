@@ -10,17 +10,17 @@ import {
   Inject,
   Req,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../decorators/roles.decorator';
-import { StaffUsecaseProxyModule } from '../../application/usecases/Staff/staff-usecase-proxy.module';
-import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
-import { ListStaffUseCase } from '../../application/usecases/Staff/staff-useCase-list';
-import { GetStaffByIdUseCase } from '../../application/usecases/Staff/staff-useCase-getById';
-import { CreateStaffUseCase } from '../../application/usecases/Staff/staff-useCase-create';
-import { UpdateStaffUseCase } from '../../application/usecases/Staff/staff-useCase-update';
-import { RemoveStaffUseCase } from '../../application/usecases/Staff/staff-useCase-remove';
-import { CreateStaffDto, UpdateStaffDto } from '../dtos/staff.dto';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { RolesGuard } from '../../auth/roles.guard';
+import { Roles } from '../../decorators/roles.decorator';
+import { StaffUsecaseProxyModule } from '../../../application/usecases/Staff/staff-usecase-proxy.module';
+import { UseCaseProxy } from '../../../application/usecases/usecase-proxy';
+import { ListStaffUseCase } from '../../../application/usecases/Staff/staff-useCase-list';
+import { GetStaffByIdUseCase } from '../../../application/usecases/Staff/staff-useCase-getById';
+import { CreateStaffUseCase } from '../../../application/usecases/Staff/staff-useCase-create';
+import { UpdateStaffUseCase } from '../../../application/usecases/Staff/staff-useCase-update';
+import { RemoveStaffUseCase } from '../../../application/usecases/Staff/staff-useCase-remove';
+import { CreateStaffDto, UpdateStaffDto } from '../../dtos/staff.dto';
 import { ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 
 @Controller('api/tenant/staff')

@@ -9,9 +9,9 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../decorators/roles.decorator';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { RolesGuard } from '../../auth/roles.guard';
+import { Roles } from '../../decorators/roles.decorator';
 import {
   ApiTags,
   ApiOperation,
@@ -21,12 +21,12 @@ import {
   ApiBody,
   ApiHeader,
 } from '@nestjs/swagger';
-import { CreateTenantDto, TenantResponseDto } from '../dtos/tenant.dto';
-import { TenantUsecaseProxyModule } from '../../application/usecases/Tenants/tenant-usecase-proxy.module';
-import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
-import { ListTenantsUseCase } from '../../application/usecases/Tenants/tenant-useCase-list';
-import { CreateTenantUseCase } from '../../application/usecases/Tenants/tenant-useCase-create';
-import { GetTenantByIdUseCase } from '../../application/usecases/Tenants/tenant-useCase-getById';
+import { CreateTenantDto, TenantResponseDto } from '../../dtos/tenant.dto';
+import { TenantUsecaseProxyModule } from '../../../application/usecases/Tenants/tenant-usecase-proxy.module';
+import { UseCaseProxy } from '../../../application/usecases/usecase-proxy';
+import { ListTenantsUseCase } from '../../../application/usecases/Tenants/tenant-useCase-list';
+import { CreateTenantUseCase } from '../../../application/usecases/Tenants/tenant-useCase-create';
+import { GetTenantByIdUseCase } from '../../../application/usecases/Tenants/tenant-useCase-getById';
 
 @Controller('admin/tenants')
 @UseGuards(JwtAuthGuard, RolesGuard)

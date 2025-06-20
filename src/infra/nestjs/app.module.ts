@@ -5,8 +5,8 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { PostgresModule } from './db/postgres/postgres.module';
-import { TenantSchemaMiddleware } from './middleware/tenant-schema.middleware';
+import { PostgresModule } from '../db/postgres/postgres.module';
+import { TenantSchemaMiddleware } from '../middleware/tenant-schema.middleware';
 import { TenantController } from './controllers/tenant.controller';
 import { ServiceController } from './controllers/service.controller';
 import { ClientController } from './controllers/client.controller';
@@ -15,15 +15,15 @@ import { AppointmentController } from './controllers/appointment.controller';
 import { PlanController } from './controllers/plan.controller';
 import { AuthController } from './controllers/auth.controller';
 import { AvailableSlotController } from './controllers/available-slot.controller';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from '../auth/auth.module';
 import { ModuleRef } from '@nestjs/core';
-import { TenantUsecaseProxyModule } from '../application/usecases/Tenants/tenant-usecase-proxy.module';
-import { ServiceUsecaseProxyModule } from '../application/usecases/Services/service-usecase-proxy.module';
-import { ClientUsecaseProxyModule } from '../application/usecases/Clients/client-usecase-proxy.module';
-import { StaffUsecaseProxyModule } from '../application/usecases/Staff/staff-usecase-proxy.module';
-import { AppointmentUsecaseProxyModule } from '../application/usecases/Appointments/appointment-usecase-proxy.module';
-import { PlanUsecaseProxyModule } from '../application/usecases/Plans/plan-usecase-proxy.module';
-import { AvailableSlotUsecaseProxyModule } from '../application/usecases/AvailableSlots/available-slot-usecase-proxy.module';
+import { TenantUsecaseProxyModule } from '../../application/usecases/Tenants/tenant-usecase-proxy.module';
+import { ServiceUsecaseProxyModule } from '../../application/usecases/Services/service-usecase-proxy.module';
+import { ClientUsecaseProxyModule } from '../../application/usecases/Clients/client-usecase-proxy.module';
+import { StaffUsecaseProxyModule } from '../../application/usecases/Staff/staff-usecase-proxy.module';
+import { AppointmentUsecaseProxyModule } from '../../application/usecases/Appointments/appointment-usecase-proxy.module';
+import { PlanUsecaseProxyModule } from '../../application/usecases/Plans/plan-usecase-proxy.module';
+import { AvailableSlotUsecaseProxyModule } from '../../application/usecases/AvailableSlots/available-slot-usecase-proxy.module';
 
 @Module({
   imports: [

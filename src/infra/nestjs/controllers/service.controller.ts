@@ -11,9 +11,9 @@ import {
   Req,
   Inject,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../decorators/roles.decorator';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { RolesGuard } from '../../auth/roles.guard';
+import { Roles } from '../../decorators/roles.decorator';
 import {
   ApiTags,
   ApiOperation,
@@ -23,14 +23,14 @@ import {
   ApiBearerAuth,
   ApiHeader,
 } from '@nestjs/swagger';
-import { ServiceUsecaseProxyModule } from '../../application/usecases/Services/service-usecase-proxy.module';
-import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
-import { ListServicesUseCase } from '../../application/usecases/Services/service-useCase-list';
-import { GetServiceByIdUseCase } from '../../application/usecases/Services/service-useCase-getById';
-import { CreateServiceUseCase } from '../../application/usecases/Services/service-useCase-create';
-import { UpdateServiceUseCase } from '../../application/usecases/Services/service-useCase-update';
-import { RemoveServiceUseCase } from '../../application/usecases/Services/service-useCase-remove';
-import { CreateServiceDto, UpdateServiceDto } from '../dtos/service.dto';
+import { ServiceUsecaseProxyModule } from '../../../application/usecases/Services/service-usecase-proxy.module';
+import { UseCaseProxy } from '../../../application/usecases/usecase-proxy';
+import { ListServicesUseCase } from '../../../application/usecases/Services/service-useCase-list';
+import { GetServiceByIdUseCase } from '../../../application/usecases/Services/service-useCase-getById';
+import { CreateServiceUseCase } from '../../../application/usecases/Services/service-useCase-create';
+import { UpdateServiceUseCase } from '../../../application/usecases/Services/service-useCase-update';
+import { RemoveServiceUseCase } from '../../../application/usecases/Services/service-useCase-remove';
+import { CreateServiceDto, UpdateServiceDto } from '../../dtos/service.dto';
 
 @Controller('api/tenant/services')
 @UseGuards(JwtAuthGuard, RolesGuard)

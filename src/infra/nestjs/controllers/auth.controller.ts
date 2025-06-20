@@ -5,9 +5,9 @@ import {
   BadRequestException,
   Req,
 } from '@nestjs/common';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../../auth/auth.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
-import { LoginDto, LoginResponseDto } from '../dtos/auth.dto';
+import { LoginDto, LoginResponseDto } from '../../dtos/auth.dto';
 
 @ApiTags('autenticação')
 @Controller('auth')

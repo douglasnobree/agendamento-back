@@ -11,17 +11,17 @@ import {
   Req,
   Query,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../decorators/roles.decorator';
-import { ClientUsecaseProxyModule } from '../../application/usecases/Clients/client-usecase-proxy.module';
-import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
-import { ListClientsUseCase } from '../../application/usecases/Clients/client-useCase-list';
-import { GetClientByIdUseCase } from '../../application/usecases/Clients/client-useCase-getById';
-import { CreateClientUseCase } from '../../application/usecases/Clients/client-useCase-create';
-import { UpdateClientUseCase } from '../../application/usecases/Clients/client-useCase-update';
-import { RemoveClientUseCase } from '../../application/usecases/Clients/client-useCase-remove';
-import { CreateClientDto, UpdateClientDto } from '../dtos/client.dto';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { RolesGuard } from '../../auth/roles.guard';
+import { Roles } from '../../decorators/roles.decorator';
+import { ClientUsecaseProxyModule } from '../../../application/usecases/Clients/client-usecase-proxy.module';
+import { UseCaseProxy } from '../../../application/usecases/usecase-proxy';
+import { ListClientsUseCase } from '../../../application/usecases/Clients/client-useCase-list';
+import { GetClientByIdUseCase } from '../../../application/usecases/Clients/client-useCase-getById';
+import { CreateClientUseCase } from '../../../application/usecases/Clients/client-useCase-create';
+import { UpdateClientUseCase } from '../../../application/usecases/Clients/client-useCase-update';
+import { RemoveClientUseCase } from '../../../application/usecases/Clients/client-useCase-remove';
+import { CreateClientDto, UpdateClientDto } from '../../dtos/client.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -33,12 +33,12 @@ import {
   ApiExtraModels,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { Client } from '../../domain/entities/client.entity';
-import { PaginatedResult } from '../../application/dtos/pagination.dto';
+import { Client } from '../../../domain/entities/client.entity';
+import { PaginatedResult } from '../../../application/dtos/pagination.dto';
 import {
   Pagination,
   ApiPaginationQuery,
-} from '../decorators/pagination.decorator';
+} from '../../decorators/pagination.decorator';
 
 @ApiExtraModels(CreateClientDto, UpdateClientDto)
 @Controller('api/tenant/clients')

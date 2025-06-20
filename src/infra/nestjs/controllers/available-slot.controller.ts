@@ -9,10 +9,10 @@ import {
   Inject,
   Query,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../decorators/roles.decorator';
-import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { RolesGuard } from '../../auth/roles.guard';
+import { Roles } from '../../decorators/roles.decorator';
+import { UseCaseProxy } from '../../../application/usecases/usecase-proxy';
 import {
   ApiBearerAuth,
   ApiHeader,
@@ -23,19 +23,19 @@ import {
   ApiQuery,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { AvailableSlotUsecaseProxyModule } from '../../application/usecases/AvailableSlots/available-slot-usecase-proxy.module';
-import { CreateAvailableSlotUseCase } from '../../application/usecases/AvailableSlots/available-slot-useCase-create';
-import { GetAvailableSlotByStaffIdUseCase } from '../../application/usecases/AvailableSlots/available-slot-useCase-getByStaffId';
-import { GetAvailableTimeslotsUseCase } from '../../application/usecases/AvailableSlots/available-slot-useCase-getAvailableTimeslots';
+import { AvailableSlotUsecaseProxyModule } from '../../../application/usecases/AvailableSlots/available-slot-usecase-proxy.module';
+import { CreateAvailableSlotUseCase } from '../../../application/usecases/AvailableSlots/available-slot-useCase-create';
+import { GetAvailableSlotByStaffIdUseCase } from '../../../application/usecases/AvailableSlots/available-slot-useCase-getByStaffId';
+import { GetAvailableTimeslotsUseCase } from '../../../application/usecases/AvailableSlots/available-slot-useCase-getAvailableTimeslots';
 import {
   CreateAvailableSlotDto,
   GetAvailableTimeslotsDto,
   AvailableTimeslotsResponseDto,
-} from '../dtos/available-slot.dto';
+} from '../../dtos/available-slot.dto';
 import {
   CreateAvailableSlotInputDto,
   GetAvailableTimeslotsInputDto,
-} from '../../application/dtos/AvailableSlots/available-slot.dto';
+} from '../../../application/dtos/AvailableSlots/available-slot.dto';
 
 @ApiTags('available-slots')
 @Controller('api/tenant/available-slots')

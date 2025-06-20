@@ -11,20 +11,20 @@ import {
   Inject,
   Req,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../decorators/roles.decorator';
-import { AppointmentUsecaseProxyModule } from '../../application/usecases/Appointments/appointment-usecase-proxy.module';
-import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
-import { ListAppointmentsUseCase } from '../../application/usecases/Appointments/appointment-useCase-list';
-import { GetAppointmentByIdUseCase } from '../../application/usecases/Appointments/appointment-useCase-getById';
-import { CreateAppointmentUseCase } from '../../application/usecases/Appointments/appointment-useCase-create';
-import { UpdateAppointmentUseCase } from '../../application/usecases/Appointments/appointment-useCase-update';
-import { RemoveAppointmentUseCase } from '../../application/usecases/Appointments/appointment-useCase-remove';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { RolesGuard } from '../../auth/roles.guard';
+import { Roles } from '../../decorators/roles.decorator';
+import { AppointmentUsecaseProxyModule } from '../../../application/usecases/Appointments/appointment-usecase-proxy.module';
+import { UseCaseProxy } from '../../../application/usecases/usecase-proxy';
+import { ListAppointmentsUseCase } from '../../../application/usecases/Appointments/appointment-useCase-list';
+import { GetAppointmentByIdUseCase } from '../../../application/usecases/Appointments/appointment-useCase-getById';
+import { CreateAppointmentUseCase } from '../../../application/usecases/Appointments/appointment-useCase-create';
+import { UpdateAppointmentUseCase } from '../../../application/usecases/Appointments/appointment-useCase-update';
+import { RemoveAppointmentUseCase } from '../../../application/usecases/Appointments/appointment-useCase-remove';
 import {
   CreateAppointmentDto,
   UpdateAppointmentDto,
-} from '../dtos/appointment.dto';
+} from '../../dtos/appointment.dto';
 import {
   ApiBearerAuth,
   ApiHeader,

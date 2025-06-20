@@ -9,9 +9,9 @@ import {
   UseGuards,
   Inject,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
-import { RolesGuard } from '../../infra/auth/roles.guard';
-import { Roles } from '../../infra/decorators/roles.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../decorators/roles.decorator';
 import { ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 import { CreatePlanDto, UpdatePlanDto } from '../dtos/plan.dto';
 import { PlanUsecaseProxyModule } from '../../application/usecases/Plans/plan-usecase-proxy.module';

@@ -10,9 +10,9 @@ import {
   Inject,
   Req,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
-import { RolesGuard } from '../../infra/auth/roles.guard';
-import { Roles } from '../../infra/decorators/roles.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../decorators/roles.decorator';
 import { StaffUsecaseProxyModule } from '../../application/usecases/Staff/staff-usecase-proxy.module';
 import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
 import { ListStaffUseCase } from '../../application/usecases/Staff/staff-useCase-list';

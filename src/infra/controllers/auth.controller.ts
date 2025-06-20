@@ -5,7 +5,7 @@ import {
   BadRequestException,
   Req,
 } from '@nestjs/common';
-import { AuthService } from '../../infra/auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { LoginDto, LoginResponseDto } from '../dtos/auth.dto';
 

@@ -11,9 +11,9 @@ import {
   Req,
   Query,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
-import { RolesGuard } from '../../infra/auth/roles.guard';
-import { Roles } from '../../infra/decorators/roles.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../decorators/roles.decorator';
 import { ClientUsecaseProxyModule } from '../../application/usecases/Clients/client-usecase-proxy.module';
 import { UseCaseProxy } from '../../application/usecases/usecase-proxy';
 import { ListClientsUseCase } from '../../application/usecases/Clients/client-useCase-list';
@@ -38,7 +38,7 @@ import { PaginatedResult } from '../../application/dtos/pagination.dto';
 import {
   Pagination,
   ApiPaginationQuery,
-} from '../../infra/decorators/pagination.decorator';
+} from '../decorators/pagination.decorator';
 
 @ApiExtraModels(CreateClientDto, UpdateClientDto)
 @Controller('api/tenant/clients')

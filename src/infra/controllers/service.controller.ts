@@ -11,9 +11,9 @@ import {
   Req,
   Inject,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../infra/auth/jwt-auth.guard';
-import { RolesGuard } from '../../infra/auth/roles.guard';
-import { Roles } from '../../infra/decorators/roles.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../decorators/roles.decorator';
 import {
   ApiTags,
   ApiOperation,

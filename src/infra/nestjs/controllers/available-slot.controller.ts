@@ -8,6 +8,8 @@ import {
   Req,
   Inject,
   Query,
+  Patch,
+  Delete,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { RolesGuard } from '../../auth/roles.guard';
@@ -27,13 +29,17 @@ import { AvailableSlotUsecaseProxyModule } from '../../../application/usecases/A
 import { CreateAvailableSlotUseCase } from '../../../application/usecases/AvailableSlots/available-slot-useCase-create';
 import { GetAvailableSlotByStaffIdUseCase } from '../../../application/usecases/AvailableSlots/available-slot-useCase-getByStaffId';
 import { GetAvailableTimeslotsUseCase } from '../../../application/usecases/AvailableSlots/available-slot-useCase-getAvailableTimeslots';
+import { UpdateAvailableSlotUseCase } from '../../../application/usecases/AvailableSlots/available-slot-useCase-update';
+import { DeleteAvailableSlotUseCase } from '../../../application/usecases/AvailableSlots/available-slot-useCase-delete';
 import {
   CreateAvailableSlotDto,
   GetAvailableTimeslotsDto,
+  UpdateAvailableSlotDto,
   AvailableTimeslotsResponseDto,
 } from '../../dtos/available-slot.dto';
 import {
   CreateAvailableSlotInputDto,
+  UpdateAvailableSlotInputDto,
   GetAvailableTimeslotsInputDto,
 } from '../../../application/dtos/AvailableSlots/available-slot.dto';
 
@@ -57,6 +63,10 @@ export class AvailableSlotController {
     private readonly getAvailableSlotByStaffIdUseCaseProxy: UseCaseProxy<GetAvailableSlotByStaffIdUseCase>,
     @Inject(AvailableSlotUsecaseProxyModule.GET_AVAILABLE_TIMESLOTS_USE_CASE)
     private readonly getAvailableTimeslotsUseCaseProxy: UseCaseProxy<GetAvailableTimeslotsUseCase>,
+    @Inject(AvailableSlotUsecaseProxyModule.UPDATE_AVAILABLE_SLOT_USE_CASE)
+    private readonly updateAvailableSlotUseCaseProxy: UseCaseProxy<UpdateAvailableSlotUseCase>,
+    @Inject(AvailableSlotUsecaseProxyModule.DELETE_AVAILABLE_SLOT_USE_CASE)
+    private readonly deleteAvailableSlotUseCaseProxy: UseCaseProxy<DeleteAvailableSlotUseCase>,
   ) {}
   @Post()
   @Roles('owner', 'admin')
@@ -311,6 +321,179 @@ export class AvailableSlotController {
     // Formatar horários para ISO string
     return {
       availableTimeslots: availableTimeslots.map((date) => date.toISOString()),
+    };
+  }
+
+  @Patch(':id')
+  @Roles('owner', 'admin')
+  @ApiOperation({
+    summary: 'Atualizar um horário disponível',
+    description:
+      'Atualiza as informações de um horário disponível existente. Permite modificar o dia da semana, horários, se é recorrente ou específico para uma data.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do horário disponível',
+    type: 'string',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Horário disponível atualizado com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', example: '550e8400-e29b-41d4-a716-446655440000' },
+        staffId: {
+          type: 'string',
+          example: '550e8400-e29b-41d4-a716-446655440001',
+        },
+        dayOfWeek: {
+          type: 'number',
+          example: 1,
+          description: '0 = domingo, 1 = segunda, ..., 6 = sábado',
+        },
+        startTime: { type: 'string', example: '2025-06-19T10:00:00.000Z' },
+        endTime: { type: 'string', example: '2025-06-19T18:00:00.000Z' },
+        isRecurring: { type: 'boolean', example: false },
+        specificDate: { type: 'string', example: '2025-08-20T00:00:00.000Z' },
+        createdAt: { type: 'string', example: '2025-06-19T15:30:00.000Z' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Parâmetros inválidos na requisição',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado - Permissões insuficientes',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Horário disponível não encontrado',
+  })
+  async update(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateAvailableSlotDto,
+    @Req() req,
+  ) {
+    const schema = req.tenantSchema;
+
+    // Converter os campos de string para Date conforme necessário
+    const inputDto = new UpdateAvailableSlotInputDto();
+
+    // Dia da semana (opcional)
+    if (updateDto.dayOfWeek !== undefined) {
+      inputDto.dayOfWeek = updateDto.dayOfWeek;
+    }
+
+    // Horário de início (opcional)
+    if (updateDto.startTime) {
+      const [startHours, startMinutes] = updateDto.startTime
+        .split(':')
+        .map(Number);
+      const startTime = new Date();
+      startTime.setHours(startHours, startMinutes, 0, 0);
+      inputDto.startTime = startTime;
+    }
+
+    // Horário de fim (opcional)
+    if (updateDto.endTime) {
+      const [endHours, endMinutes] = updateDto.endTime.split(':').map(Number);
+      const endTime = new Date();
+      endTime.setHours(endHours, endMinutes, 0, 0);
+      inputDto.endTime = endTime;
+    }
+
+    // Campos booleanos e data específica (opcionais)
+    if (updateDto.isRecurring !== undefined) {
+      inputDto.isRecurring = updateDto.isRecurring;
+    }
+
+    if (updateDto.specificDate) {
+      inputDto.specificDate = new Date(updateDto.specificDate);
+    }
+
+    const updatedSlot = await this.updateAvailableSlotUseCaseProxy
+      .getInstance()
+      .execute({
+        schema,
+        id,
+        data: inputDto,
+      });
+
+    return {
+      id: updatedSlot.id,
+      staffId: updatedSlot.staffId,
+      dayOfWeek: updatedSlot.dayOfWeek,
+      startTime: updatedSlot.startTime.toISOString(),
+      endTime: updatedSlot.endTime.toISOString(),
+      isRecurring: updatedSlot.isRecurring,
+      specificDate: updatedSlot.specificDate?.toISOString(),
+      createdAt: updatedSlot.createdAt?.toISOString(),
+    };
+  }
+
+  @Delete(':id')
+  @Roles('owner', 'admin')
+  @ApiOperation({
+    summary: 'Excluir um horário disponível',
+    description:
+      'Remove permanentemente um horário disponível do sistema. Esta operação não pode ser desfeita.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID único do horário disponível',
+    type: 'string',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Horário disponível excluído com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Horário disponível excluído com sucesso',
+        },
+        id: {
+          type: 'string',
+          example: '550e8400-e29b-41d4-a716-446655440000',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado - Permissões insuficientes',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Horário disponível não encontrado',
+  })
+  async remove(@Param('id') id: string, @Req() req) {
+    const schema = req.tenantSchema;
+
+    await this.deleteAvailableSlotUseCaseProxy.getInstance().execute({
+      schema,
+      id,
+    });
+
+    return {
+      message: 'Horário disponível excluído com sucesso',
+      id,
     };
   }
 }

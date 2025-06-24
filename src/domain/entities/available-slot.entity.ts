@@ -1,11 +1,11 @@
 export type AvailableSlotProps = {
   id: string;
   staffId: string;
-  dayOfWeek: number; // 0-6 (0 = domingo, 6 = sábado)
-  startTime: Date; // Hora de início (somente a parte de tempo é relevante)
-  endTime: Date; // Hora de fim (somente a parte de tempo é relevante)
-  isRecurring: boolean; // Se é recorrente toda semana
-  specificDate?: Date; // Data específica, usado quando isRecurring = false
+  dayOfWeek: number;
+  startTime: Date; 
+  endTime: Date;
+  isRecurring: boolean;
+  specificDate?: Date; 
   createdAt?: Date;
 };
 

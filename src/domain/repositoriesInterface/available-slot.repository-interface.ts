@@ -13,8 +13,6 @@ export interface AvailableSlotRepository {
   saveMany(schema: string, availableSlots: AvailableSlot[]): Promise<void>;
   remove(schema: string, id: string): Promise<void>;
   update(schema: string, availableSlot: AvailableSlot): Promise<void>;
-
-  // Método para verificar disponibilidade para um agendamento
   isSlotAvailable(
     schema: string,
     staffId: string,
@@ -23,7 +21,6 @@ export interface AvailableSlotRepository {
     excludeAppointmentId?: string,
   ): Promise<boolean>;
 
-  // Retorna todos os horários disponíveis para um funcionário em um período
   getAvailableTimeslots(
     schema: string,
     staffId: string,
